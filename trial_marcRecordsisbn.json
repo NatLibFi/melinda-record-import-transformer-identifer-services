@@ -1,0 +1,491 @@
+[
+    {
+        "leader": "00832nam_a22002178i_4500",
+        "fields": [
+            {
+                "tag": "008",
+                "value": "200115s2020____fi ||||______ |0| 0|eng| "
+            },
+            {
+                "tag": "020",
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                    {
+                        "code": "a",
+                        "value": "978-951-51-5804-8"
+                    },
+                    {
+                        "code": "q",
+                        "value": "nidottu"
+                    }
+                ]
+            },
+            {
+                "tag": "040",
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                    {
+                        "code": "a",
+                        "value": "FI-NL"
+                    },
+                    {
+                        "code": "b",
+                        "value": "fin"
+                    },
+                    {
+                        "code": "e",
+                        "value": "rda"
+                    }
+                ]
+            },
+            {
+                "tag": "041",
+                "ind1": "0",
+                "ind2": " ",
+                "subfields": [
+                    {
+                        "code": "a",
+                        "value": "eng"
+                    }
+                ]
+            },
+            {
+                "tag": "100",
+                "ind1": "1",
+                "ind2": " ",
+                "subfields": [
+                    {
+                        "code": "a",
+                        "value": "Liu, Chang,"
+                    },
+                    {
+                        "code": "g",
+                        "value": "ENNAKKOTIETO."
+                    }
+                ]
+            },
+            {
+                "tag": "245",
+                "ind1": "1",
+                "ind2": "0",
+                "subfields": [
+                    {
+                        "code": "a",
+                        "value": "Physical and oxidative stability of modified faba bean protein isolate (FBPI) in oil-in-water emulsions."
+                    }
+                ]
+            },
+            {
+                "tag": "263",
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                    {
+                        "code": "a",
+                        "value": "202002"
+                    }
+                ]
+            },
+            {
+                "tag": "264",
+                "ind1": " ",
+                "ind2": "1",
+                "subfields": [
+                    {
+                        "code": "a",
+                        "value": "Helsinki :"
+                    },
+                    {
+                        "code": "b",
+                        "value": "University of Helsinki,"
+                    },
+                    {
+                        "code": "c",
+                        "value": "2020."
+                    }
+                ]
+            },
+            {
+                "tag": "264",
+                "ind1": " ",
+                "ind2": "3",
+                "subfields": [
+                    {
+                        "code": "a",
+                        "value": "Helsinki :"
+                    },
+                    {
+                        "code": "b",
+                        "value": "Unigrafia "
+                    }
+                ]
+            },
+            {
+                "tag": "336",
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                    {
+                        "code": "a",
+                        "value": "teksti"
+                    },
+                    {
+                        "code": "b",
+                        "value": "txt"
+                    },
+                    {
+                        "code": "2",
+                        "value": "rdacontent"
+                    }
+                ]
+            },
+            {
+                "tag": "337",
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                    {
+                        "code": "a",
+                        "value": "käytettävissä ilman laitetta"
+                    },
+                    {
+                        "code": "b",
+                        "value": "n"
+                    },
+                    {
+                        "code": "2",
+                        "value": "rdamedia"
+                    }
+                ]
+            },
+            {
+                "tag": "338",
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                    {
+                        "code": "a",
+                        "value": "nide"
+                    },
+                    {
+                        "code": "b",
+                        "value": "nc"
+                    },
+                    {
+                        "code": "2",
+                        "value": "rdacarrier"
+                    }
+                ]
+            },
+            {
+                "tag": "502",
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                    {
+                        "code": "a",
+                        "value": "Väitöskirja :"
+                    },
+                    {
+                        "code": "c",
+                        "value": "University of Helsinki."
+                    },
+                    {
+                        "code": "9",
+                        "value": "FENNI<KEEP>"
+                    }
+                ]
+            },
+            {
+                "tag": "594",
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                    {
+                        "code": "a",
+                        "value": "ENNAKKOTIETO KANSALLISKIRJASTO."
+                    },
+                    {
+                        "code": "5",
+                        "value": "FENNI"
+                    }
+                ]
+            },
+            {
+                "tag": "594",
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                    {
+                        "code": "a",
+                        "value": "EI VASTAANOTETTU"
+                    },
+                    {
+                        "code": "5",
+                        "value": "FENNI"
+                    }
+                ]
+            },
+            {
+                "tag": "776",
+                "ind1": "0",
+                "ind2": "8",
+                "subfields": [
+                    {
+                        "code": "i",
+                        "value": "Verkkoaineisto (PDF):"
+                    },
+                    {
+                        "code": "z",
+                        "value": "978-951-51-5805-5"
+                    },
+                    {
+                        "code": "9",
+                        "value": "FENNI<KEEP>"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "leader": "00804nam_a22002178i_4500",
+        "fields": [
+            {
+                "tag": "007",
+                "value": "cr|||_||||||||"
+            },
+            {
+                "tag": "008",
+                "value": "200115s2020____fi ||||_o____ |0| 0|eng| "
+            },
+            {
+                "tag": "020",
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                    {
+                        "code": "a",
+                        "value": "978-951-51-5805-5"
+                    },
+                    {
+                        "code": "q",
+                        "value": "PDF"
+                    }
+                ]
+            },
+            {
+                "tag": "040",
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                    {
+                        "code": "a",
+                        "value": "FI-NL"
+                    },
+                    {
+                        "code": "b",
+                        "value": "fin"
+                    },
+                    {
+                        "code": "e",
+                        "value": "rda"
+                    }
+                ]
+            },
+            {
+                "tag": "041",
+                "ind1": "0",
+                "ind2": " ",
+                "subfields": [
+                    {
+                        "code": "a",
+                        "value": "eng"
+                    }
+                ]
+            },
+            {
+                "tag": "100",
+                "ind1": "1",
+                "ind2": " ",
+                "subfields": [
+                    {
+                        "code": "a",
+                        "value": "Liu, Chang,"
+                    },
+                    {
+                        "code": "g",
+                        "value": "ENNAKKOTIETO."
+                    }
+                ]
+            },
+            {
+                "tag": "245",
+                "ind1": "1",
+                "ind2": "0",
+                "subfields": [
+                    {
+                        "code": "a",
+                        "value": "Physical and oxidative stability of modified faba bean protein isolate (FBPI) in oil-in-water emulsions."
+                    }
+                ]
+            },
+            {
+                "tag": "263",
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                    {
+                        "code": "a",
+                        "value": "202002"
+                    }
+                ]
+            },
+            {
+                "tag": "264",
+                "ind1": " ",
+                "ind2": "1",
+                "subfields": [
+                    {
+                        "code": "a",
+                        "value": "Helsinki :"
+                    },
+                    {
+                        "code": "b",
+                        "value": "University of Helsinki,"
+                    },
+                    {
+                        "code": "c",
+                        "value": "2020."
+                    }
+                ]
+            },
+            {
+                "tag": "336",
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                    {
+                        "code": "a",
+                        "value": "teksti"
+                    },
+                    {
+                        "code": "b",
+                        "value": "txt"
+                    },
+                    {
+                        "code": "2",
+                        "value": "rdacontent"
+                    }
+                ]
+            },
+            {
+                "tag": "337",
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                    {
+                        "code": "a",
+                        "value": "tietokonekäyttöinen"
+                    },
+                    {
+                        "code": "b",
+                        "value": "c"
+                    },
+                    {
+                        "code": "2",
+                        "value": "rdamedia"
+                    }
+                ]
+            },
+            {
+                "tag": "338",
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                    {
+                        "code": "a",
+                        "value": "verkkoaineisto"
+                    },
+                    {
+                        "code": "b",
+                        "value": "cr"
+                    },
+                    {
+                        "code": "2",
+                        "value": "rdacarrier"
+                    }
+                ]
+            },
+            {
+                "tag": "502",
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                    {
+                        "code": "a",
+                        "value": "Väitöskirja :"
+                    },
+                    {
+                        "code": "c",
+                        "value": "University of Helsinki."
+                    },
+                    {
+                        "code": "9",
+                        "value": "FENNI<KEEP>"
+                    }
+                ]
+            },
+            {
+                "tag": "594",
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                    {
+                        "code": "a",
+                        "value": "ENNAKKOTIETO KANSALLISKIRJASTO."
+                    },
+                    {
+                        "code": "5",
+                        "value": "FENNI"
+                    }
+                ]
+            },
+            {
+                "tag": "594",
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                    {
+                        "code": "a",
+                        "value": "EI VASTAANOTETTU"
+                    },
+                    {
+                        "code": "5",
+                        "value": "FENNI"
+                    }
+                ]
+            },
+            {
+                "tag": "776",
+                "ind1": "0",
+                "ind2": "8",
+                "subfields": [
+                    {
+                        "code": "i",
+                        "value": "Painettu:"
+                    },
+                    {
+                        "code": "z",
+                        "value": "978-951-51-5804-8"
+                    },
+                    {
+                        "code": "9",
+                        "value": "FENNI<KEEP>"
+                    }
+                ]
+            }
+        ]
+    }
+]
