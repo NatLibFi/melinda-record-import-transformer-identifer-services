@@ -78,30 +78,33 @@ export default function (stream, {validate = true, fix = true}) {
 		const marcRecord = new MarcRecord();
 
 		genLeader();
-		if (obj.formatDetails.format === 'electronic') {
-			gen007();
-		}
-
+		gen007();
 		gen008();
 		gen020();
+		gen022();
 		gen040();
 		gen041();
 		gen042();
 		gen080();
 		gen084();
 		gen100();
+		gen222();
 		gen245();
 		gen250();
 		// gen255();
 		// gen263();
 		gen264();
+		gen310();
 		gen336();
 		gen337();
 		gen338();
 		gen490();
 		gen594();
 		gen700();
+		gen710();
 		gen776();
+		gen780();
+		gen935();
 
 		return {failed: false, record: marcRecord};
 
@@ -114,12 +117,12 @@ export default function (stream, {validate = true, fix = true}) {
 				{17: '8'},
 				{18: 'i'},
 				{'06': 'a'},
-				{'08': (obj.formatDetails.format === 'printed' && obj.type === 'dissertation') ? '^' : ' '},
+				{'08': value08()},
 				{11: '2'},
 				{'*': ' '}
 			];
 			// Leader modified for electronic book
-			if (obj.formatDetails.format === 'electronic') {
+			if (obj.formatDetails.format === 'electronic' || obj.type === 'book') {
 				rules = rules.reduce((acc, item) => {
 					const keys = Object.keys(item);
 					keys.filter(key => {
@@ -140,10 +143,30 @@ export default function (stream, {validate = true, fix = true}) {
 				chars[Number(keys[0])] = values[0];
 			});
 			marcRecord.leader = chars.join('');
+
+			function value08() {
+				if (obj.formatDetails.format === 'printed') {
+					if (obj.type === 'dissertation' || Object.keys(obj.seriesDetails).length > 0) {
+						return '^';
+					}
+				}
+
+				return ' ';
+			}
 		}
 
 		function gen007() {
-			const rules = [{'00': 'c'}, {'01': 'r'}, {'*': ' '}];
+			let rules;
+			if (obj.formatDetails.format === 'electronic') {
+				rules = [{'00': 'c'}, {'01': 'r'}, {'*': ' '}];
+			}
+
+			if (obj.formatDetails.format === 'printed') {
+				if (Object.keys(obj.seriesDetails).length > 0) {
+					rules = [{'00': 't'}, {'01': 'a'}];
+				}
+			}
+
 			const chars = new Array(23).fill(' ');
 			rules.forEach(item => {
 				const keys = Object.keys(item);
@@ -158,30 +181,66 @@ export default function (stream, {validate = true, fix = true}) {
 			marcRecord.insertField({
 				tag: '007', value: chars.join('')
 			});
-
 			// ************************ $33 fiction/non-fiction/cartoon not implemented yet **************************************
 		}
 
 		function gen008() {
-			let rules = [{'06': 's'}, {'07-10': obj.publicationTime.substr(0, 4)}, {'15-17': ' fi'}, {'18-21': '||||'}, {29: '|'}, {30: '0'}, {31: '|'}, {33: '0'}, {34: '|'}, {'35-37': obj.language}, {38: '|'}, {'*': ' '}];
+			let rules = [
+				{'06': 's'},
+				{'07-10': obj.publicationTime.substr(0, 4)},
+				{'11-14': value1114()},
+				{'15-17': ' fi'},
+				{'18-21': '||||'},
+				{29: '|'},
+				{30: '0'},
+				{31: '|'},
+				{33: '0'},
+				{34: '|'},
+				{'35-37': obj.language},
+				{38: '|'},
+				{'*': ' '}
+			];
 			// Leader modified for electronic book
 			if (obj.formatDetails.format === 'electronic') {
+				if (obj.type !== 'dissertation') {
+					rules = rules.reduce((acc, item) => {
+						const keys = Object.keys(item);
+						keys.filter(key => {
+							if (key !== '15-17') {
+								acc.push(item);
+							}
+
+							return acc;
+						});
+						acc.push({23: 'o'});
+						return acc;
+					}, []);
+				}
+
+				rules.push({22: '^'}, {23: 'o'}, {24: 'm'});
+			}
+
+			if (obj.formatDetails.format === 'printed' && obj.type === 'dissertation') {
+				rules.push({24: 'm'});
+			}
+
+			if (Object.keys(obj.seriesDetails).length > 0) {
 				rules = rules.reduce((acc, item) => {
 					const keys = Object.keys(item);
 					keys.filter(key => {
-						if (key !== '15-17') {
+						if (key !== '15-17' && key !== 29 && key !== 30 && key !== 31 && key !== 33 && key !== 34) {
 							acc.push(item);
 						}
 
 						return acc;
 					});
-					acc.push({23: 'o'});
+					acc.push({19: 'r'}, {21: 'p'}, {22: '|'}, {29: '0'}, {'30-32': '|'}, {33: 'b'}, {34: '|'});
+					if (obj.formatDetails.format === 'electronic') {
+						rules.push({23: 'o'});
+					}
+
 					return acc;
 				}, []);
-			}
-
-			if (obj.formatDetails.format === 'printed' && obj.type === 'dissertation') {
-				rules.push({24: 'm'});
 			}
 
 			const chars = new Array(40).fill(' ');
@@ -199,10 +258,20 @@ export default function (stream, {validate = true, fix = true}) {
 				tag: '008', value: chars.join('')
 			});
 
+			function value1114() {
+				if (Object.keys(obj.seriesDetails).length > 0) {
+					return '9999';
+				}
+			}
+
 			// ************************ $33 fiction/non-fiction/cartoon not implemented yet **************************************
 		}
 
 		function gen020() {
+			if (Object.keys(obj.seriesDetails).length > 0) {
+				return;
+			}
+
 			marcRecord.insertField({
 				tag: '020',
 				subfields: [
@@ -234,6 +303,27 @@ export default function (stream, {validate = true, fix = true}) {
 				]
 			});
 			// ****************** 	$a another ISBN, if the book is a part of a multi-volume publication is left to implement ********************************
+		}
+
+		function gen022() {
+			if (Object.keys(obj.seriesDetails).length > 0) {
+				marcRecord.insertField({
+					tag: '022',
+					ind1: '0',
+					ind2: '_',
+					subfields: [
+						{
+							code: 'a',
+							value: '{ISSN id}'
+						},
+						{
+							code: '2',
+							value: 'a'
+						}
+
+					]
+				});
+			}
 		}
 
 		function gen040() {
@@ -281,7 +371,11 @@ export default function (stream, {validate = true, fix = true}) {
 		}
 
 		function gen080() {
-			if (obj.formatDetails.format === 'printed' && obj.type === 'dissertation') {
+			if (obj.type === 'dissertation') {
+				return;
+			}
+
+			if (Object.keys(obj.seriesDetails).length > 0) {
 				return;
 			}
 
@@ -312,7 +406,11 @@ export default function (stream, {validate = true, fix = true}) {
 		}
 
 		function gen084() {
-			if (obj.formatDetails.format === 'printed' && obj.type === 'dissertation') {
+			if (obj.type === 'dissertation') {
+				return;
+			}
+
+			if (Object.keys(obj.seriesDetails).length > 0) {
 				return;
 			}
 
@@ -339,6 +437,10 @@ export default function (stream, {validate = true, fix = true}) {
 		}
 
 		function gen100() {
+			if (Object.keys(obj.seriesDetails).length > 0) {
+				return;
+			}
+
 			marcRecord.insertField({
 				tag: '100',
 				ind1: '1',
@@ -361,10 +463,31 @@ export default function (stream, {validate = true, fix = true}) {
 			// ********************************* If role is 'kirjoittaja' ****************************
 		}
 
+		function gen222() {
+			if (Object.keys(obj.seriesDetails).length > 0) {
+				marcRecord.insertField({
+					tag: '222',
+					ind1: '_',
+					ind2: '0',
+					subfields: [
+						{
+							code: 'a',
+							value: '{keytitle}'
+						},
+						{
+							code: 'b',
+							value: 'Painettu' // If there is another publication form (printed)
+						}
+					]
+				});
+			}
+		}
+
 		function gen245() {
 			marcRecord.insertField({
 				tag: '245',
 				ind1: ind1(),
+				ind2: '0',
 				subfields: [
 					{
 						code: 'a',
@@ -378,11 +501,10 @@ export default function (stream, {validate = true, fix = true}) {
 			});
 
 			function ind1() {
-				if (obj.formatDetails.format === 'printed' && obj.type === 'dissertation') {
+				if (obj.type === 'dissertation') {
 					return '1';
 				}
 
-				console.log(marcRecord.get(/^100$/).length)
 				if (marcRecord.get(/^100$/).length > 0) {
 					return '1';
 				}
@@ -395,6 +517,10 @@ export default function (stream, {validate = true, fix = true}) {
 
 		function gen250() {
 			if (obj.formatDetails.format === 'printed' && obj.type === 'dissertation') {
+				return;
+			}
+
+			if (Object.keys(obj.seriesDetails).length > 0) {
 				return;
 			}
 
@@ -411,6 +537,10 @@ export default function (stream, {validate = true, fix = true}) {
 
 		function gen255() {
 			if (obj.formatDetails.format === 'printed' && obj.type === 'dissertation') {
+				return;
+			}
+
+			if (Object.keys(obj.seriesDetails).length > 0) {
 				return;
 			}
 
@@ -477,6 +607,20 @@ export default function (stream, {validate = true, fix = true}) {
 			}
 		}
 
+		function gen310() {
+			if (Object.keys(obj.seriesDetails).length > 0) {
+				marcRecord.insertField({
+					tag: '310',
+					subfields: [
+						{
+							code: 'a',
+							value: '{frequency}'
+						}
+					]
+				});
+			}
+		}
+
 		function gen336() {
 			marcRecord.insertField({
 				tag: '336',
@@ -517,7 +661,7 @@ export default function (stream, {validate = true, fix = true}) {
 			});
 
 			function aValue() {
-				if (obj.formatDetails.format === 'printed') {
+				if (obj.formatDetails.format === 'printed' || Object.keys(obj.seriesDetails).length > 0) {
 					return 'käytettävissä ilman laitetta';
 				}
 
@@ -527,7 +671,7 @@ export default function (stream, {validate = true, fix = true}) {
 			}
 
 			function bValue() {
-				if (obj.formatDetails.format === 'printed') {
+				if (obj.formatDetails.format === 'printed' || Object.keys(obj.seriesDetails).length > 0) {
 					return 'n';
 				}
 
@@ -557,7 +701,7 @@ export default function (stream, {validate = true, fix = true}) {
 			});
 
 			function aValue() {
-				if (obj.formatDetails.format === 'printed') {
+				if (obj.formatDetails.format === 'printed' || Object.keys(obj.seriesDetails).length > 0) {
 					return 'nide';
 				}
 
@@ -567,7 +711,7 @@ export default function (stream, {validate = true, fix = true}) {
 			}
 
 			function bValue() {
-				if (obj.formatDetails.format === 'printed') {
+				if (obj.formatDetails.format === 'printed' || Object.keys(obj.seriesDetails).length > 0) {
 					return 'nc';
 				}
 
@@ -577,7 +721,27 @@ export default function (stream, {validate = true, fix = true}) {
 			}
 		}
 
+		function gen362() {
+			if (Object.keys(obj.seriesDetails).length > 0) {
+				marcRecord.insertField({
+					tag: '362',
+					ind1: '0',
+					ind2: '_',
+					subfields: [
+						{
+							code: 'a',
+							value: `${obj.seriesDetails.volume},`
+						}
+					]
+				});
+			}
+		}
+
 		function gen490() {
+			if (Object.keys(obj.seriesDetails).length > 0) {
+				return;
+			}
+
 			marcRecord.insertField({
 				tag: '490',
 				ind1: '0',
@@ -599,6 +763,32 @@ export default function (stream, {validate = true, fix = true}) {
 			});
 		}
 
+		function gen502() {
+			if (Object.keys(obj.seriesDetails).length > 0) {
+				return;
+			}
+
+			if (obj.type === 'dissertation') {
+				marcRecord.insertField({
+					tag: '502',
+					subfields: [
+						{
+							code: 'a',
+							value: `${obj.seriesDetails.title},`
+						},
+						{
+							code: 'c',
+							value: '{name of the university, ends with period}'
+						},
+						{
+							code: '9',
+							value: 'FENNI<KEEP>'
+						}
+					]
+				});
+			}
+		}
+
 		function gen594() {
 			marcRecord.insertField({
 				tag: '594',
@@ -614,22 +804,32 @@ export default function (stream, {validate = true, fix = true}) {
 				]
 			});
 
-			marcRecord.insertField({
-				tag: '594',
-				subfields: [
-					{
-						code: 'a',
-						value: 'EI VASTAANOTETTU'
-					},
-					{
-						code: '5',
-						value: 'FENNI'
-					}
-				]
-			});
+			if (!Object.keys(obj.seriesDetails).length > 0) {
+				marcRecord.insertField({
+					tag: '594',
+					subfields: [
+						{
+							code: 'a',
+							value: 'EI VASTAANOTETTU'
+						},
+						{
+							code: '5',
+							value: 'FENNI'
+						}
+					]
+				});
+			}
 		}
 
 		function gen700() {
+			if (Object.keys(obj.seriesDetails).length > 0) {
+				return;
+			}
+
+			if (obj.type === 'dissertation') {
+				return;
+			}
+
 			marcRecord.insertField({
 				tag: '700',
 				ind1: '1',
@@ -649,6 +849,46 @@ export default function (stream, {validate = true, fix = true}) {
 					}
 				]
 			});
+		}
+
+		function gen710() {
+			if (Object.keys(obj.seriesDetails).length > 0) {
+				marcRecord.insertField({
+					tag: '710',
+					ind1: '2',
+					ind2: '_',
+					subfields: [
+						{
+							code: 'a',
+							value: `${obj.publisher}.` //ends with period
+						}
+					]
+				});
+			}
+		}
+
+		function gen760() {
+			if (Object.keys(obj.seriesDetails).length > 0) {
+				marcRecord.insertField({
+					tag: '760',
+					ind1: '0',
+					ind2: '0',
+					subfields: [
+						{
+							code: 't',
+							value: '{title of the main series}' // If publication is part of main series
+						},
+						{
+							code: 'x',
+							value: '{ISSN of main series}' // If publication is part of main series
+						},
+						{
+							code: '9',
+							value: 'FENNI<KEEP>'
+						}
+					]
+				});
+			}
 		}
 
 		function gen776() {
@@ -680,6 +920,52 @@ export default function (stream, {validate = true, fix = true}) {
 				if (obj.formatDetails.format === 'electronic') {
 					return 'Painettu';
 				}
+			}
+		}
+
+		function gen780() {
+			if (Object.keys(obj.seriesDetails).length > 0) {
+				marcRecord.insertField({
+					tag: '780',
+					ind1: '0',
+					ind2: '0',
+					subfields: [
+						{
+							code: 't',
+							value: '{title of the previously issued series}'
+						},
+						{
+							code: 'c',
+							value: '{Not Specified}' // Not specified
+						},
+						{
+							code: 'x',
+							value: '{ISS of the previously issued series}'
+						},
+						{
+							code: '9',
+							value: 'FENNI<KEEP>'
+						}
+					]
+				});
+			}
+		}
+
+		function gen935() {
+			if (Object.keys(obj.seriesDetails).length > 0) {
+				marcRecord.insertField({
+					tag: '935',
+					subfields: [
+						{
+							code: 'a',
+							value: 'ISSNpre'
+						},
+						{
+							code: '5',
+							value: 'FENNI'
+						}
+					]
+				});
 			}
 		}
 
