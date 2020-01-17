@@ -111,7 +111,7 @@ export default function (stream, {validate = true, fix = true}) {
 		function genLeader() {
 			let rules = [
 				{'05': 'n'},
-				{'07': 'm'},
+				{'07': value07()},
 				{'09': 'a'},
 				{10: '2'},
 				{17: '8'},
@@ -153,12 +153,25 @@ export default function (stream, {validate = true, fix = true}) {
 
 				return ' ';
 			}
+
+			function value07() {
+				if (Object.keys(obj.seriesDetails).length > 0) {
+					return 's';
+				}
+
+				return 'm';
+			}
 		}
 
 		function gen007() {
 			let rules;
 			if (obj.formatDetails.format === 'electronic') {
-				rules = [{'00': 'c'}, {'01': 'r'}, {'*': ' '}];
+				rules = [{'00': 'c'}, {'01': 'r'}];
+				if (Object.keys(obj.seriesDetails).length > 0) {
+					rules.push({'*': '|'});
+				} else {
+					rules.push({'*': ' '});
+				}
 			}
 
 			if (obj.formatDetails.format === 'printed') {
@@ -186,7 +199,7 @@ export default function (stream, {validate = true, fix = true}) {
 
 		function gen008() {
 			let rules = [
-				{'06': 's'},
+				{'06': value06()},
 				{'07-10': obj.publicationTime.substr(0, 4)},
 				{'11-14': value1114()},
 				{'15-17': ' fi'},
@@ -200,6 +213,26 @@ export default function (stream, {validate = true, fix = true}) {
 				{38: '|'},
 				{'*': ' '}
 			];
+
+			if (Object.keys(obj.seriesDetails).length > 0) {
+				rules = rules.reduce((acc, item) => {
+					const keys = Object.keys(item);
+					keys.filter(key => {
+						if (key !== '15-17' && key !== 29 && key !== 30 && key !== 31 && key !== 33 && key !== 34) {
+							acc.push(item);
+						}
+
+						return acc;
+					});
+					acc.push({19: 'r'}, {21: 'p'}, {22: '|'}, {29: '0'}, {'30-32': '|'}, {33: 'b'}, {34: '0'});
+					if (obj.formatDetails.format === 'electronic') {
+						rules.push({23: 'o'});
+					}
+
+					return acc;
+				}, []);
+			}
+
 			// Leader modified for electronic book
 			if (obj.formatDetails.format === 'electronic') {
 				if (obj.type !== 'dissertation') {
@@ -224,25 +257,6 @@ export default function (stream, {validate = true, fix = true}) {
 				rules.push({24: 'm'});
 			}
 
-			if (Object.keys(obj.seriesDetails).length > 0) {
-				rules = rules.reduce((acc, item) => {
-					const keys = Object.keys(item);
-					keys.filter(key => {
-						if (key !== '15-17' && key !== 29 && key !== 30 && key !== 31 && key !== 33 && key !== 34) {
-							acc.push(item);
-						}
-
-						return acc;
-					});
-					acc.push({19: 'r'}, {21: 'p'}, {22: '|'}, {29: '0'}, {'30-32': '|'}, {33: 'b'}, {34: '|'});
-					if (obj.formatDetails.format === 'electronic') {
-						rules.push({23: 'o'});
-					}
-
-					return acc;
-				}, []);
-			}
-
 			const chars = new Array(40).fill(' ');
 			rules.forEach(item => {
 				const keys = Object.keys(item);
@@ -257,6 +271,14 @@ export default function (stream, {validate = true, fix = true}) {
 			marcRecord.insertField({
 				tag: '008', value: chars.join('')
 			});
+
+			function value06() {
+				if (Object.keys(obj.seriesDetails).length > 0) {
+					return 'c';
+				}
+
+				return 's';
+			}
 
 			function value1114() {
 				if (Object.keys(obj.seriesDetails).length > 0) {
@@ -476,10 +498,21 @@ export default function (stream, {validate = true, fix = true}) {
 						},
 						{
 							code: 'b',
-							value: 'Painettu' // If there is another publication form (printed)
+							value: valueSubFieldb() // If there is another publication form (printed)
 						}
 					]
 				});
+			}
+
+			function valueSubFieldb() {
+				// Check if there is another publication not implemented yet
+				if (obj.formatDetails.format === 'printed') {
+					return 'Painettu';
+				}
+
+				if (obj.formatDetails.format === 'electronic') {
+					return 'Verkkoaineisto';
+				}
 			}
 		}
 
@@ -495,7 +528,7 @@ export default function (stream, {validate = true, fix = true}) {
 					},
 					{
 						code: 'b',
-						value: `${obj.subtitle}`
+						value: `${obj.subtitle}.`
 					}
 				]
 			});
@@ -869,25 +902,40 @@ export default function (stream, {validate = true, fix = true}) {
 
 		function gen760() {
 			if (Object.keys(obj.seriesDetails).length > 0) {
+
 				marcRecord.insertField({
 					tag: '760',
 					ind1: '0',
 					ind2: '0',
-					subfields: [
-						{
-							code: 't',
-							value: '{title of the main series}' // If publication is part of main series
-						},
-						{
-							code: 'x',
-							value: '{ISSN of main series}' // If publication is part of main series
-						},
-						{
-							code: '9',
-							value: 'FENNI<KEEP>'
-						}
-					]
+					subfields: valueSubfields()
 				});
+			}
+
+			function valueSubfields() {
+				const subfields = [
+					{
+						code: 't',
+						value: '{title of the main series}' // If publication is part of main series
+					},
+					{
+						code: 'x',
+						value: '{ISSN of main series}' // If publication is part of main series
+					},
+					{
+						code: '9',
+						value: 'FENNI<KEEP>'
+					}
+				];
+
+				if (obj.formatDetails.format === 'printed') {
+					return subfields;
+				}
+
+				subfields.push({
+					code: 'c',
+					value: '{}' //Not Defined in description
+				});
+				return subfields;
 			}
 		}
 
@@ -896,20 +944,8 @@ export default function (stream, {validate = true, fix = true}) {
 				tag: '776',
 				ind1: '0',
 				ind2: '8',
-				subfields: [
-					{
-						code: 'i',
-						value: aValue()
-					},
-					{
-						code: 'z',
-						value: '{if there is another publication form, z = ISBN of the other form}'
-					},
-					{
-						code: '9',
-						value: 'FENNI<KEEP>'
-					}
-				]
+				subfields: valueSubfields()
+
 			});
 
 			function aValue() {
@@ -920,6 +956,26 @@ export default function (stream, {validate = true, fix = true}) {
 				if (obj.formatDetails.format === 'electronic') {
 					return 'Painettu';
 				}
+			}
+
+			function valueSubfields() {
+				const subfields = [
+					{
+						code: 'i',
+						value: aValue()
+					},
+					{
+						code: '9',
+						value: 'FENNI<KEEP>'
+					}
+				];
+				if (Object.keys(obj.seriesDetails).length > 0) {
+					subfields.push({code: 't', value: '{title from another form'}, {code: '', value: '{ISSN from another form'});
+					return subfields;
+				}
+
+				subfields.push({code: 'z', value: '{ISBN from another form'});
+				return subfields;
 			}
 		}
 
@@ -940,7 +996,7 @@ export default function (stream, {validate = true, fix = true}) {
 						},
 						{
 							code: 'x',
-							value: '{ISS of the previously issued series}'
+							value: '{ISSN of the previously issued series}'
 						},
 						{
 							code: '9',
