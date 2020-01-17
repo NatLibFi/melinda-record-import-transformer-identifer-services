@@ -25,3 +25,20 @@
 * for the JavaScript code in this file.
 *
 */
+
+import validateFactory from '@natlibfi/marc-record-validate';
+import {FieldsPresent as fieldsPresent} from '@natlibfi/marc-record-validators-melinda';
+
+export default async () => {
+	const validate = validateFactory([await fieldsPresent([/^(020|022|024)$/])]);
+
+	return async (record, fix, validateFixes) => {
+		const opts = fix ? {fix, validateFixes} : {fix};
+		const result = await validate(record, opts);
+		return {
+			record: result.record,
+			failed: result.valid === false,
+			messages: result.report
+		};
+	};
+};

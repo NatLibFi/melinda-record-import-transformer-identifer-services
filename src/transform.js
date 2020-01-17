@@ -32,21 +32,23 @@ import {EventEmitter} from 'events';
 import {parser} from 'stream-json';
 import {chain} from 'stream-chain';
 import {streamArray} from 'stream-json/streamers/StreamArray';
+import createValidator from './validate';
 
 class TransformEmitter extends EventEmitter {}
 const {createLogger} = Utils;
 
-export default function (stream, {validate = true, fix = true}) {
+export default function (stream, {validate = true}) {
 	MarcRecord.setValidationOptions({subfieldValues: false});
 	const Emitter = new TransformEmitter();
 	const logger = createLogger();
-
+	let validator;
 	logger.log('debug', 'Starting to send recordEvents');
 
 	readStream(stream);
 	return Emitter;
 
 	async function readStream(stream) {
+		validator = await createValidator();
 		try {
 			const promises = [];
 			const pipeline = chain([
@@ -60,7 +62,6 @@ export default function (stream, {validate = true, fix = true}) {
 
 				async function transform(value) {
 					const result = convertRecord(value);
-					console.log(value);
 					Emitter.emit('record', result);
 				}
 			});
@@ -91,20 +92,27 @@ export default function (stream, {validate = true, fix = true}) {
 		gen222();
 		gen245();
 		gen250();
-		// gen255();
-		// gen263();
+		gen255();
+		gen263();
 		gen264();
 		gen310();
 		gen336();
 		gen337();
 		gen338();
+		gen362();
 		gen490();
+		gen502();
 		gen594();
 		gen700();
 		gen710();
+		gen760();
 		gen776();
 		gen780();
 		gen935();
+
+		if (validate === true) {
+			return validator(marcRecord, validate);
+		}
 
 		return {failed: false, record: marcRecord};
 
@@ -608,7 +616,7 @@ export default function (stream, {validate = true, fix = true}) {
 				subfields: [
 					{
 						code: 'a',
-						value: `${obj.formatDetails.city} :` // replace with city of a publisher
+						value: `${obj.formatDetails.city} :` // Replace with city of a publisher
 					},
 					{
 						code: 'b',
@@ -893,7 +901,7 @@ export default function (stream, {validate = true, fix = true}) {
 					subfields: [
 						{
 							code: 'a',
-							value: `${obj.publisher}.` //ends with period
+							value: `${obj.publisher}.` // Ends with period
 						}
 					]
 				});
@@ -902,7 +910,6 @@ export default function (stream, {validate = true, fix = true}) {
 
 		function gen760() {
 			if (Object.keys(obj.seriesDetails).length > 0) {
-
 				marcRecord.insertField({
 					tag: '760',
 					ind1: '0',
@@ -933,7 +940,7 @@ export default function (stream, {validate = true, fix = true}) {
 
 				subfields.push({
 					code: 'c',
-					value: '{}' //Not Defined in description
+					value: '{}' // Not Defined in description
 				});
 				return subfields;
 			}
@@ -970,7 +977,7 @@ export default function (stream, {validate = true, fix = true}) {
 					}
 				];
 				if (Object.keys(obj.seriesDetails).length > 0) {
-					subfields.push({code: 't', value: '{title from another form'}, {code: '', value: '{ISSN from another form'});
+					subfields.push({code: 't', value: '{title from another form'}, {code: 'x', value: '{ISSN from another form'});
 					return subfields;
 				}
 
