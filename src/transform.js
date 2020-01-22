@@ -98,40 +98,35 @@ export default function (stream) {
 
 						function genLeader() {
 							const rules = makeRules();
-							// Leader modified for electronic book
-							if (obj.formatDetails.format === 'electronic' || obj.type === 'book') {
-								rules.reduce((acc, item) => {
-									const keys = Object.keys(item);
-									keys.filter(key => {
-										if (key !== '08') {
-											acc.push(item);
-										}
+							const chars = new Array(24).fill(' ').map((_, index) => {
+								const entry = rules.filter(({index: ruleIndex}) => ruleIndex === index);
+								if (entry.length > 0) {
+									return entry[0].value;
+								}
 
-										return acc;
-									});
-									return acc;
-								}, []);
-							}
-
-							const chars = new Array(24).fill(' ').map((k, index) => {
-								rules.forEach(item => {
-									const keys = Object.keys(item);
-									const values = Object.values(item);
-									if (index === Number(keys[0])) {
-										k = values[0];
-									}
-								});
-								return k;
+								return ' ';
 							});
 							marcRecord.leader = chars.join('');
 
 							function makeRules() {
-								const array = [{'05': 'n'}, {'07': value07()}, {'09': 'a'}, {10: '2'}, {17: '8'}, {18: 'i'}, {'06': 'a'}, {'08': value08()}, {11: '2'}];
+								const baseChars = [
+									{index: 5, value: 'n'},
+									{index: 6, value: 'a'},
+									{index: 7, value: value07()},
+									{index: 9, value: 'a'},
+									{index: 10, value: '2'},
+									{index: 11, value: '2'},
+									{index: 17, value: '8'},
+									{index: 18, value: 'i'}
+								];
+
+								if (obj.formatDetails.format === 'printed') {
+									return baseChars.concat({index: '08', value: value08()});
+								}
+
 								function value08() {
-									if (obj.formatDetails.format === 'printed') {
-										if (obj.type === 'dissertation' || Object.keys(obj.seriesDetails).length > 0) {
-											return '^';
-										}
+									if (obj.type === 'dissertation' || Object.keys(obj.seriesDetails).length > 0) {
+										return '^';
 									}
 
 									return ' ';
@@ -144,84 +139,80 @@ export default function (stream) {
 
 									return 'm';
 								}
-
-								return array;
 							}
 						}
 
 						function gen007() {
 							const rules = makeRules();
-							const chars = new Array(23).fill(' ').map((k, index) => {
-								rules.forEach(item => {
-									const keys = Object.keys(item);
-									const values = Object.values(item);
-									if (isNaN(Number(keys[0]))) {
-										const keysArray = keys[0].split('-');
-										const valuesArray = values[0].split('');
-										const last = keysArray[1];
-										for (let init = Number(keysArray[0]), count = 0; init <= last; init++, count++) {
-											if (index === init) {
-												k = valuesArray[count];
-											}
-										}
+							const chars = new Array(23).fill(' ').map((_, index) => {
+								const entry = rules.filter(({index: ruleIndex}) => ruleIndex === index);
+								if (obj.formatDetails.format === 'electronic') {
+									if (Object.keys(obj.seriesDetails).length > 0) {
+										return '|';
 									}
 
-									if (index === Number(keys[0])) {
-										k = values[0];
+									if (entry.length > 0) {
+										return entry[0].value;
 									}
-								});
-								return k;
+
+									return ' ';
+								}
+
+								if (obj.formatDetails.format === 'printed' && Object.keys(obj.seriesDetails).length > 0) {
+									if (entry.length > 0) {
+										return entry[0].value;
+									}
+
+									return ' ';
+								}
+
+								/* eslint array-callback-return: "error" */
+								return false;
 							});
+
 							marcRecord.insertField({
 								tag: '007', value: chars.join('')
 							});
 							// ************************ $33 fiction/non-fiction/cartoon not implemented yet **************************************
 							function makeRules() {
 								if (obj.formatDetails.format === 'electronic') {
-									const array = [{'00': 'c'}, {'01': 'r'}];
-									if (Object.keys(obj.seriesDetails).length > 0) {
-										array.push({'*': '|'});
-									} else {
-										array.push({'*': ' '});
-									}
-
-									return array;
+									return [{index: 0, value: 'c'}, {index: 1, value: 'r'}];
 								}
 
 								if (obj.formatDetails.format === 'printed') {
 									if (Object.keys(obj.seriesDetails).length > 0) {
-										const array = [{'00': 't'}, {'01': 'a'}];
-										return array;
+										return [{index: 0, value: 't'}, {index: 1, value: 'a'}];
 									}
 								}
 							}
 						}
 
 						function gen008() {
-							const chars = new Array(40).fill(' ').map((k, index) => {
-								return applyRules(makeRules());
-
-								function applyRules(rules) {
-									rules.forEach(item => {
-										const keys = Object.keys(item);
-										const values = Object.values(item);
-										if (isNaN(Number(keys[0]))) {
-											const keysArray = keys[0].split('-');
-											const valuesArray = values[0].split('');
-											const last = keysArray[1];
-											for (let init = Number(keysArray[0]), count = 0; init <= last; init++, count++) {
-												if (index === init) {
-													k = valuesArray[count];
-												}
+							const rules = makeRules();
+							const chars = new Array(40).fill(' ').map((_, index) => {
+								const entry = rules.reduce((acc, item) => {
+									if (isNaN(Number(item.index))) {
+										const indexArray = item.index.split('-');
+										const valueArray = item.value.split('');
+										for (let init = Number(indexArray[0]), count = 0; init <= indexArray[1]; init++, count++) {
+											if (index === init) {
+												acc.push({index: index, value: valueArray[count]});
 											}
 										}
+									}
 
-										if (index === Number(keys[0])) {
-											k = values[0];
-										}
-									});
-									return k;
+									if (item.index === index) {
+										acc.push(item);
+									}
+
+									return acc;
+								}, []);
+
+								if (entry.length > 0) {
+									return entry[0].value;
 								}
+
+								return ' ';
 							});
 
 							marcRecord.insertField({
@@ -229,48 +220,70 @@ export default function (stream) {
 							});
 							// ************************ $33 fiction/non-fiction/cartoon not implemented yet **************************************
 							function makeRules() {
-								const array = [{'06': value06()}, {'07-10': obj.publicationTime.substr(0, 4)}, {'11-14': value1114()}, {'15-17': ' fi'}, {'18-21': '||||'}, {29: '|'}, {30: '0'}, {31: '|'}, {33: '0'}, {34: '|'}, {'35-37': obj.language}, {38: '|'}];
+								const baseChars = [
+									{index: 6, value: value06()},
+									{index: '7-10', value: obj.publicationTime.substr(0, 4)},
+									{index: '35-37', value: obj.language},
+									{index: 38, value: '|'}
+								];
+
 								if (Object.keys(obj.seriesDetails).length > 0) {
-									const newArray = array.reduce((acc, item) => {
-										const key = Object.keys(item)[0];
-										if (key !== '15-17' && key !== 29 && key !== 30 && key !== 31 && key !== 33 && key !== 34) {
-											if (key === Object.keys(item)[0]) {
-												acc.push(item);
-											}
-										}
-
-										return acc;
-									}, []);
-									newArray.push({19: 'r'}, {21: 'p'}, {22: '|'}, {29: '0'}, {'30-32': '|||'}, {33: 'b'}, {34: '0'});
+									const seriesChars = [
+										{index: '11-14', value: value1114()},
+										{index: '15-17', value: ' fi'},
+										{index: 19, value: 'r'},
+										{index: 21, value: 'p'},
+										{index: 22, value: '|'},
+										{index: 29, value: '0'},
+										{index: '30-32', value: '|||'},
+										{index: 33, value: 'b'},
+										{index: 34, value: '0'}
+									];
 									if (obj.formatDetails.format === 'electronic') {
-										newArray.push({23: 'o'});
+										return baseChars.concat(seriesChars, [{index: 23, value: 'o'}]);
 									}
 
-									return newArray;
+									if (obj.formatDetails.format === 'printed') {
+										return baseChars.concat(seriesChars);
+									}
 								}
 
-								// // Leader modified for electronic book
-								if (obj.formatDetails.format === 'electronic') {
-									if (obj.type !== 'dissertation') {
-										return array.reduce((acc, item) => {
-											const keys = Object.keys(item);
-											acc = keys.reduce((accumulate, key) => {
-												if (key !== '15-17') {
-													accumulate.push(item);
-												}
-
-												return accumulate;
-											}, []);
-											acc.push({23: 'o'});
-											return acc;
-										}, []);
+								if (obj.type === 'book') {
+									const bookChars = [
+										{index: '15-17', value: ' fi'},
+										{index: 29, value: '|'},
+										{index: 30, value: '0'},
+										{index: 31, value: '|'},
+										{index: 33, value: '0'},
+										{index: 34, value: '|'}
+									];
+									if (obj.formatDetails.format === 'electronic') {
+										return baseChars.concat(bookChars, [{index: 23, value: 'o'}]);
 									}
 
-									return array.push({22: '^'}, {23: 'o'}, {24: 'm'});
+									if (obj.formatDetails.format === 'printed') {
+										return baseChars.concat(bookChars);
+									}
 								}
 
-								if (obj.formatDetails.format === 'printed' && obj.type === 'dissertation') {
-									return array.push({24: 'm'});
+								if (obj.type === 'dissertation') {
+									const dissertationChars = [
+										{index: '15-17', value: ' fi'},
+										{index: '18-21', value: '||||'},
+										{index: 24, value: 'm'},
+										{index: 29, value: '|'},
+										{index: 30, value: '0'},
+										{index: 31, value: '|'},
+										{index: 33, value: '0'},
+										{index: 34, value: '|'}
+									];
+									if (obj.formatDetails.format === 'electronic') {
+										return baseChars.concat(dissertationChars, [{index: 22, value: '^'}, {index: 23, value: 'o'}]);
+									}
+
+									if (obj.formatDetails.format === 'printed') {
+										return baseChars.concat(dissertationChars);
+									}
 								}
 
 								function value06() {
@@ -393,11 +406,7 @@ export default function (stream) {
 						}
 
 						function gen080() {
-							if (obj.type === 'dissertation') {
-								return;
-							}
-
-							if (Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.type === 'dissertation' || Object.keys(obj.seriesDetails).length > 0) {
 								return;
 							}
 
@@ -428,11 +437,7 @@ export default function (stream) {
 						}
 
 						function gen084() {
-							if (obj.type === 'dissertation') {
-								return;
-							}
-
-							if (Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.type === 'dissertation' || Object.keys(obj.seriesDetails).length > 0) {
 								return;
 							}
 
@@ -549,11 +554,7 @@ export default function (stream) {
 						}
 
 						function gen250() {
-							if (obj.formatDetails.format === 'printed' && obj.type === 'dissertation') {
-								return;
-							}
-
-							if (Object.keys(obj.seriesDetails).length > 0) {
+							if ((obj.formatDetails.format === 'printed' && obj.type === 'dissertation') || Object.keys(obj.seriesDetails).length > 0) {
 								return;
 							}
 
@@ -569,11 +570,7 @@ export default function (stream) {
 						}
 
 						function gen255() {
-							if (obj.formatDetails.format === 'printed' && obj.type === 'dissertation') {
-								return;
-							}
-
-							if (Object.keys(obj.seriesDetails).length > 0) {
+							if ((obj.formatDetails.format === 'printed' && obj.type === 'dissertation') || Object.keys(obj.seriesDetails).length > 0) {
 								return;
 							}
 
@@ -855,11 +852,7 @@ export default function (stream) {
 						}
 
 						function gen700() {
-							if (Object.keys(obj.seriesDetails).length > 0) {
-								return;
-							}
-
-							if (obj.type === 'dissertation') {
+							if (Object.keys(obj.seriesDetails).length > 0 || obj.type === 'dissertation') {
 								return;
 							}
 
