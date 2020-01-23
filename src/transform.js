@@ -99,9 +99,9 @@ export default function (stream) {
 						function genLeader() {
 							const rules = makeRules();
 							const chars = new Array(24).fill(' ').map((_, index) => {
-								const entry = rules.filter(({index: ruleIndex}) => ruleIndex === index);
-								if (entry.length > 0) {
-									return entry[0].value;
+								const entry = rules.find(({index: ruleIndex}) => ruleIndex === index);
+								if (entry) {
+									return entry.value;
 								}
 
 								return ' ';
@@ -124,6 +124,8 @@ export default function (stream) {
 									return baseChars.concat({index: '08', value: value08()});
 								}
 
+								return baseChars;
+
 								function value08() {
 									if (obj.type === 'dissertation' || Object.keys(obj.seriesDetails).length > 0) {
 										return '^';
@@ -145,25 +147,9 @@ export default function (stream) {
 						function gen007() {
 							const rules = makeRules();
 							const chars = new Array(23).fill(' ').map((_, index) => {
-								const entry = rules.filter(({index: ruleIndex}) => ruleIndex === index);
-								if (obj.formatDetails.format === 'electronic') {
-									if (Object.keys(obj.seriesDetails).length > 0) {
-										return '|';
-									}
-
-									if (entry.length > 0) {
-										return entry[0].value;
-									}
-
-									return ' ';
-								}
-
-								if (obj.formatDetails.format === 'printed' && Object.keys(obj.seriesDetails).length > 0) {
-									if (entry.length > 0) {
-										return entry[0].value;
-									}
-
-									return ' ';
+								const entry = rules.find(({index: ruleIndex}) => ruleIndex === index);
+								if (entry) {
+									return entry.value;
 								}
 
 								/* eslint array-callback-return: "error" */
@@ -175,14 +161,43 @@ export default function (stream) {
 							});
 							// ************************ $33 fiction/non-fiction/cartoon not implemented yet **************************************
 							function makeRules() {
+								const result = [];
 								if (obj.formatDetails.format === 'electronic') {
-									return [{index: 0, value: 'c'}, {index: 1, value: 'r'}];
+									for (let i = 0; i <= 23; i++) {
+										if (i === 0) {
+											result.push({index: i, value: 'c'});
+										}
+
+										if (i === 1) {
+											result.push({index: i, value: 'r'});
+										}
+
+										if (Object.keys(obj.seriesDetails).length > 0) {
+											result.push({index: i, value: '|'});
+										}
+
+										result.push({index: i, value: ' '});
+									}
+
+									return result;
 								}
 
 								if (obj.formatDetails.format === 'printed') {
 									if (Object.keys(obj.seriesDetails).length > 0) {
-										return [{index: 0, value: 't'}, {index: 1, value: 'a'}];
+										for (let i = 0; i <= 23; i++) {
+											if (i === 0) {
+												result.push({index: i, value: 't'});
+											}
+
+											if (i === 1) {
+												result.push({index: i, value: 'a'});
+											}
+
+											result.push({index: i, value: ' '});
+										}
 									}
+
+									return result;
 								}
 							}
 						}
@@ -218,27 +233,22 @@ export default function (stream) {
 							marcRecord.insertField({
 								tag: '008', value: chars.join('')
 							});
+
 							// ************************ $33 fiction/non-fiction/cartoon not implemented yet **************************************
 							function makeRules() {
-								const baseChars = [
-									{index: 6, value: value06()},
-									{index: '7-10', value: obj.publicationTime.substr(0, 4)},
-									{index: '35-37', value: obj.language},
-									{index: 38, value: '|'}
-								];
+								const baseChars = [{index: 6, value: value06()}, {index: 38, value: '|'}].concat(gen0710(), gen3537());
 
 								if (Object.keys(obj.seriesDetails).length > 0) {
+									for (let i = 0; i < 39; i++) {
 									const seriesChars = [
-										{index: '11-14', value: value1114()},
-										{index: '15-17', value: ' fi'},
 										{index: 19, value: 'r'},
 										{index: 21, value: 'p'},
 										{index: 22, value: '|'},
 										{index: 29, value: '0'},
-										{index: '30-32', value: '|||'},
 										{index: 33, value: 'b'},
 										{index: 34, value: '0'}
-									];
+									].concat(gen1114(), gen1517(), gen3032());
+
 									if (obj.formatDetails.format === 'electronic') {
 										return baseChars.concat(seriesChars, [{index: 23, value: 'o'}]);
 									}
@@ -250,13 +260,13 @@ export default function (stream) {
 
 								if (obj.type === 'book') {
 									const bookChars = [
-										{index: '15-17', value: ' fi'},
 										{index: 29, value: '|'},
 										{index: 30, value: '0'},
 										{index: 31, value: '|'},
 										{index: 33, value: '0'},
 										{index: 34, value: '|'}
-									];
+									].concat(gen1517());
+
 									if (obj.formatDetails.format === 'electronic') {
 										return baseChars.concat(bookChars, [{index: 23, value: 'o'}]);
 									}
@@ -268,15 +278,14 @@ export default function (stream) {
 
 								if (obj.type === 'dissertation') {
 									const dissertationChars = [
-										{index: '15-17', value: ' fi'},
-										{index: '18-21', value: '||||'},
 										{index: 24, value: 'm'},
 										{index: 29, value: '|'},
 										{index: 30, value: '0'},
 										{index: 31, value: '|'},
 										{index: 33, value: '0'},
 										{index: 34, value: '|'}
-									];
+									].concat(gen1517(), gen1821());
+
 									if (obj.formatDetails.format === 'electronic') {
 										return baseChars.concat(dissertationChars, [{index: 22, value: '^'}, {index: 23, value: 'o'}]);
 									}
@@ -294,10 +303,34 @@ export default function (stream) {
 									return 's';
 								}
 
-								function value1114() {
+								function gen1114() {
 									if (Object.keys(obj.seriesDetails).length > 0) {
-										return '9999';
+										return generate('9999', 11);
 									}
+								}
+
+								function gen0710() {
+									return generate(obj.publicationTime.slice(0, 4), 7);
+								}
+
+								function gen1517() {
+									return generate(' fi', 15);
+								}
+
+								function gen1821() {
+									return generate('||||', 18);
+								}
+
+								function gen3032() {
+									return generate('|||', 30);
+								}
+
+								function gen3537() {
+									return generate(obj.language, 35);
+								}
+
+								function generate(string, startIndex) {
+									return string.split('').map((value, index) => ({value, index: index + startIndex}));
 								}
 							}
 						}
