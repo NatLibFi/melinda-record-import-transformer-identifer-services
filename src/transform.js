@@ -205,26 +205,10 @@ export default function (stream) {
 						function gen008() {
 							const rules = makeRules();
 							const chars = new Array(40).fill(' ').map((_, index) => {
-								const entry = rules.reduce((acc, item) => {
-									if (isNaN(Number(item.index))) {
-										const indexArray = item.index.split('-');
-										const valueArray = item.value.split('');
-										for (let init = Number(indexArray[0]), count = 0; init <= indexArray[1]; init++, count++) {
-											if (index === init) {
-												acc.push({index: index, value: valueArray[count]});
-											}
-										}
-									}
+								const entry = rules.find(({index: ruleIndex}) => ruleIndex === index);
 
-									if (item.index === index) {
-										acc.push(item);
-									}
-
-									return acc;
-								}, []);
-
-								if (entry.length > 0) {
-									return entry[0].value;
+								if (entry) {
+									return entry.value;
 								}
 
 								return ' ';
@@ -239,7 +223,6 @@ export default function (stream) {
 								const baseChars = [{index: 6, value: value06()}, {index: 38, value: '|'}].concat(gen0710(), gen3537());
 
 								if (Object.keys(obj.seriesDetails).length > 0) {
-									for (let i = 0; i < 39; i++) {
 									const seriesChars = [
 										{index: 19, value: 'r'},
 										{index: 21, value: 'p'},
