@@ -161,43 +161,27 @@ export default function (stream) {
 							});
 							// ************************ $33 fiction/non-fiction/cartoon not implemented yet **************************************
 							function makeRules() {
-								const result = [];
 								if (obj.formatDetails.format === 'electronic') {
-									for (let i = 0; i <= 23; i++) {
-										if (i === 0) {
-											result.push({index: i, value: 'c'});
-										}
-
-										if (i === 1) {
-											result.push({index: i, value: 'r'});
-										}
-
-										if (Object.keys(obj.seriesDetails).length > 0) {
-											result.push({index: i, value: '|'});
-										}
-
-										result.push({index: i, value: ' '});
+									const initialChars = [
+										{index: 0, value: 'c'},
+										{index: 1, value: 'r'}
+									];
+									if (Object.keys(obj.seriesDetails).length > 0) {
+										const finalChars = new Array(22).fill(' ').map((_, index) => ({index: index + initialChars.length, value: '|'}));
+										return initialChars.concat(finalChars);
 									}
 
-									return result;
+									const finalChars = new Array(22).fill(' ').map((_, index) => ({index: index + initialChars.length, value: ' '}));
+									return initialChars.concat(finalChars);
 								}
 
 								if (obj.formatDetails.format === 'printed') {
-									if (Object.keys(obj.seriesDetails).length > 0) {
-										for (let i = 0; i <= 23; i++) {
-											if (i === 0) {
-												result.push({index: i, value: 't'});
-											}
-
-											if (i === 1) {
-												result.push({index: i, value: 'a'});
-											}
-
-											result.push({index: i, value: ' '});
-										}
-									}
-
-									return result;
+									const initialChars = [
+										{index: 0, value: 't'},
+										{index: 1, value: 'a'}
+									];
+									const finalChars = new Array(22).fill(' ').map((_, index) => ({index: index + initialChars.length, value: ' '}));
+									return initialChars.concat(finalChars);
 								}
 							}
 						}
