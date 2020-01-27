@@ -146,14 +146,11 @@ export default function (stream) {
 
 						function gen007() {
 							const rules = makeRules();
+
+							/* eslint array-callback-return: ["error", { allowImplicit: true }] */
 							const chars = new Array(23).fill(' ').map((_, index) => {
 								const entry = rules.find(({index: ruleIndex}) => ruleIndex === index);
-								if (entry) {
-									return entry.value;
-								}
-
-								/* eslint array-callback-return: "error" */
-								return false;
+								return entry.value;
 							});
 
 							marcRecord.insertField({
@@ -167,11 +164,11 @@ export default function (stream) {
 										{index: 1, value: 'r'}
 									];
 									if (Object.keys(obj.seriesDetails).length > 0) {
-										const finalChars = new Array(22).fill(' ').map((_, index) => ({index: index + initialChars.length, value: '|'}));
+										const finalChars = new Array(21).fill(' ').map((_, index) => ({index: index + initialChars.length, value: '|'}));
 										return initialChars.concat(finalChars);
 									}
 
-									const finalChars = new Array(22).fill(' ').map((_, index) => ({index: index + initialChars.length, value: ' '}));
+									const finalChars = new Array(2).fill(' ').map((_, index) => ({index: index + initialChars.length, value: ' '}));
 									return initialChars.concat(finalChars);
 								}
 
@@ -180,7 +177,7 @@ export default function (stream) {
 										{index: 0, value: 't'},
 										{index: 1, value: 'a'}
 									];
-									const finalChars = new Array(22).fill(' ').map((_, index) => ({index: index + initialChars.length, value: ' '}));
+									const finalChars = new Array(21).fill(' ').map((_, index) => ({index: index + initialChars.length, value: ' '}));
 									return initialChars.concat(finalChars);
 								}
 							}
