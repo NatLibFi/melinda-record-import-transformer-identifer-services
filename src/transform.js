@@ -150,7 +150,11 @@ export default function (stream) {
 							/* eslint array-callback-return: ["error", { allowImplicit: true }] */
 							const chars = new Array(23).fill(' ').map((_, index) => {
 								const entry = rules.find(({index: ruleIndex}) => ruleIndex === index);
-								return entry.value;
+								if (entry) {
+									return entry.value;
+								}
+
+								return _;
 							});
 
 							marcRecord.insertField({
@@ -168,7 +172,7 @@ export default function (stream) {
 										return initialChars.concat(finalChars);
 									}
 
-									const finalChars = new Array(2).fill(' ').map((_, index) => ({index: index + initialChars.length, value: ' '}));
+									const finalChars = new Array(21).fill(' ').map((_, index) => ({index: index + initialChars.length, value: ' '}));
 									return initialChars.concat(finalChars);
 								}
 
