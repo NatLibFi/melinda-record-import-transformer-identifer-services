@@ -52,14 +52,18 @@ export default function (stream) {
 				stream,
 				parser(),
 				streamArray()
-			]);
+			]).on('error', err => Emitter.emit('error', err));
 
 			pipeline.on('data', async data => {
 				promises.push(transform(data.value));
 
 				async function transform(value) {
-					const result = convertRecord(value);
-					Emitter.emit('record', result);
+					try {
+						const result = convertRecord(value);
+						Emitter.emit('record', result);
+					} catch (err) {
+						Emitter.emit('error', err);
+					}
 
 					function convertRecord(obj) {
 						const marcRecord = new MarcRecord();
@@ -1021,9 +1025,13 @@ export default function (stream) {
 				}
 			});
 			pipeline.on('end', async () => {
-				logger.log('debug', `Handled ${promises.length} recordEvents`);
-				await Promise.all(promises);
-				Emitter.emit('end', promises.length);
+				try {
+					logger.log('debug', `Handled ${promises.length} recordEvents`);
+					await Promise.all(promises);
+					Emitter.emit('end', promises.length);
+				} catch (err) {
+					Emitter.emit('error', err);
+				}
 			});
 		} catch (err) {
 			Emitter.emit('error', err);
