@@ -319,7 +319,7 @@ export default function (stream) {
 										code: 'a',
 										value: obj.identifiers.reduce((acc, item) => {
 											if (item.type === 'electronic' || item.type === 'printed') {
-												acc = item.id;
+												return item.id;
 											}
 
 											return acc;
@@ -329,11 +329,11 @@ export default function (stream) {
 										code: 'q',
 										value: obj.identifiers.reduce((acc, item) => {
 											if (item.type === 'printed') {
-												acc = obj.formatDetails.printFormat;
+												return obj.formatDetails.printFormat;
 											}
 
 											if (item.type === 'electronic') {
-												acc = obj.formatDetails.fileFormat;
+												return obj.formatDetails.fileFormat;
 											}
 
 											return acc;
