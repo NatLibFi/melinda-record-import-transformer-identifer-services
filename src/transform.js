@@ -53,7 +53,7 @@ export default function (stream) {
 				parser(),
 				streamArray()
 			]);
-// Test
+
 			pipeline.on('data', async data => {
 				promises.push(transform(data.value));
 
