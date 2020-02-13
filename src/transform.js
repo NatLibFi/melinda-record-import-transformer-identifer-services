@@ -199,6 +199,15 @@ export default function (stream) {
 
 									return result;
 								}
+
+								// Need to do for these format
+								if (obj.formatDetails.format === 'cd') {
+									return false;
+								}
+
+								if (obj.formatDetails.format === 'printed-and-electronic') {
+									return false;
+								}
 							}
 						}
 
@@ -292,7 +301,7 @@ export default function (stream) {
 								}
 
 								function gen0710() {
-									return generate(obj.publicationTime.slice(0, 4), 7);
+									return obj.publicationTime && generate(obj.publicationTime.slice(0, 4), 7);
 								}
 
 								function gen1517() {
@@ -483,25 +492,28 @@ export default function (stream) {
 								return;
 							}
 
-							marcRecord.insertField({
-								tag: '100',
-								ind1: '1',
-								ind2: '_',
-								subfields: [
-									{
-										code: 'a',
-										value: `${obj.authors[0].givenName}, ${obj.authors[0].familyName}` // Multiple authors ????????????
-									},
-									{
-										code: 'e',
-										value: obj.authors[0].role
-									},
-									{
-										code: 'g',
-										value: 'ENNAKKOTIETO.'
-									}
-								]
-							});
+							if (obj.authors && Object.keys(obj.authors).length > 0) {
+								marcRecord.insertField({
+									tag: '100',
+									ind1: '1',
+									ind2: '_',
+									subfields: [
+										{
+											code: 'a',
+											value: `${obj.authors[0].givenName}, ${obj.authors[0].familyName}` // Multiple authors ????????????
+										},
+										{
+											code: 'e',
+											value: obj.authors[0].role
+										},
+										{
+											code: 'g',
+											value: 'ENNAKKOTIETO.'
+										}
+									]
+								});
+							}
+
 							// ********************************* If role is 'kirjoittaja' ****************************
 						}
 
@@ -620,7 +632,7 @@ export default function (stream) {
 								subfields: [
 									{
 										code: 'a',
-										value: `${obj.formatDetails.city} :` // Replace with city of a publisher
+										value: obj.formatDetails.city && `${obj.formatDetails.city} :` // Replace with city of a publisher
 									},
 									{
 										code: 'b',
@@ -628,7 +640,7 @@ export default function (stream) {
 									},
 									{
 										code: 'c',
-										value: `${obj.publicationTime.substr(0, 4)}.`
+										value: obj.publicationTime && `${obj.publicationTime.substr(0, 4)}.`
 									}
 								]
 							});
@@ -878,11 +890,11 @@ export default function (stream) {
 								subfields: [
 									{
 										code: 'a',
-										value: `${obj.authors.givenName}, ${obj.authors.familyName}`
+										value: obj.authors && `${obj.authors.givenName}, ${obj.authors.familyName}`
 									},
 									{
 										code: 'e',
-										value: obj.authors.role // If role is 'toimittaja', 'kuvittaja', 'kääntäjä'!!
+										value: obj.authors && obj.authors.role // If role is 'toimittaja', 'kuvittaja', 'kääntäjä'!!
 									},
 									{
 										code: 'g',
