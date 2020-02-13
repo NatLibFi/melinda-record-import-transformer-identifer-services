@@ -52,18 +52,14 @@ export default function (stream) {
 				stream,
 				parser(),
 				streamArray()
-			]).on('error', err => Emitter.emit('error', err));
+			]);
 
 			pipeline.on('data', async data => {
 				promises.push(transform(data.value));
 
 				async function transform(value) {
-					try {
-						const result = convertRecord(value);
-						Emitter.emit('record', result);
-					} catch (err) {
-						Emitter.emit('error', err);
-					}
+					const result = convertRecord(value);
+					Emitter.emit('record', result);
 
 					function convertRecord(obj) {
 						const marcRecord = new MarcRecord();
@@ -131,7 +127,7 @@ export default function (stream) {
 								return baseChars;
 
 								function value08() {
-									if (obj.type === 'dissertation' || Object.keys(obj.seriesDetails).length > 0) {
+									if (obj.type === 'dissertation' || (obj.seriesDetails && (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)))) {
 										return '^';
 									}
 
@@ -139,7 +135,7 @@ export default function (stream) {
 								}
 
 								function value07() {
-									if (Object.keys(obj.seriesDetails).length > 0) {
+									if (obj.seriesDetails && (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
 										return 's';
 									}
 
@@ -150,15 +146,14 @@ export default function (stream) {
 
 						function gen007() {
 							const rules = makeRules();
-
-							/* eslint array-callback-return: ["error", { allowImplicit: true }] */
 							const chars = new Array(23).fill(' ').map((_, index) => {
 								const entry = rules.find(({index: ruleIndex}) => ruleIndex === index);
 								if (entry) {
 									return entry.value;
 								}
 
-								return _;
+								/* eslint array-callback-return: "error" */
+								return false;
 							});
 
 							marcRecord.insertField({
@@ -166,27 +161,52 @@ export default function (stream) {
 							});
 							// ************************ $33 fiction/non-fiction/cartoon not implemented yet **************************************
 							function makeRules() {
+								const result = [];
 								if (obj.formatDetails.format === 'electronic') {
-									const initialChars = [
-										{index: 0, value: 'c'},
-										{index: 1, value: 'r'}
-									];
-									if (Object.keys(obj.seriesDetails).length > 0) {
-										const finalChars = new Array(21).fill(' ').map((_, index) => ({index: index + initialChars.length, value: '|'}));
-										return initialChars.concat(finalChars);
+									for (let i = 0; i <= 23; i++) {
+										if (i === 0) {
+											result.push({index: i, value: 'c'});
+										}
+
+										if (i === 1) {
+											result.push({index: i, value: 'r'});
+										}
+
+										if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+											result.push({index: i, value: '|'});
+										}
+
+										result.push({index: i, value: ' '});
 									}
 
-									const finalChars = new Array(21).fill(' ').map((_, index) => ({index: index + initialChars.length, value: ' '}));
-									return initialChars.concat(finalChars);
+									return result;
 								}
 
 								if (obj.formatDetails.format === 'printed') {
-									const initialChars = [
-										{index: 0, value: 't'},
-										{index: 1, value: 'a'}
-									];
-									const finalChars = new Array(21).fill(' ').map((_, index) => ({index: index + initialChars.length, value: ' '}));
-									return initialChars.concat(finalChars);
+									if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length) > 0) {
+										for (let i = 0; i <= 23; i++) {
+											if (i === 0) {
+												result.push({index: i, value: 't'});
+											}
+
+											if (i === 1) {
+												result.push({index: i, value: 'a'});
+											}
+
+											result.push({index: i, value: ' '});
+										}
+									}
+
+									return result;
+								}
+
+								// Need to do for these format
+								if (obj.formatDetails.format === 'cd') {
+									return false;
+								}
+
+								if (obj.formatDetails.format === 'printed-and-electronic') {
+									return false;
 								}
 							}
 						}
@@ -194,8 +214,7 @@ export default function (stream) {
 						function gen008() {
 							const rules = makeRules();
 							const chars = new Array(40).fill(' ').map((_, index) => {
-								const entry = rules.find(({index: ruleIndex}) => ruleIndex === index);
-
+								const entry = rules && rules.find(({index: ruleIndex}) => ruleIndex === index);
 								if (entry) {
 									return entry.value;
 								}
@@ -211,7 +230,7 @@ export default function (stream) {
 							function makeRules() {
 								const baseChars = [{index: 6, value: value06()}, {index: 38, value: '|'}].concat(gen0710(), gen3537());
 
-								if (Object.keys(obj.seriesDetails).length > 0) {
+								if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 									const seriesChars = [
 										{index: 19, value: 'r'},
 										{index: 21, value: 'p'},
@@ -268,7 +287,7 @@ export default function (stream) {
 								}
 
 								function value06() {
-									if (Object.keys(obj.seriesDetails).length > 0) {
+									if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 										return 'c';
 									}
 
@@ -276,13 +295,13 @@ export default function (stream) {
 								}
 
 								function gen1114() {
-									if (Object.keys(obj.seriesDetails).length > 0) {
+									if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 										return generate('9999', 11);
 									}
 								}
 
 								function gen0710() {
-									return generate(obj.publicationTime.slice(0, 4), 7);
+									return obj.publicationTime && generate(obj.publicationTime.slice(0, 4), 7);
 								}
 
 								function gen1517() {
@@ -308,7 +327,7 @@ export default function (stream) {
 						}
 
 						function gen020() {
-							if (Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 								return;
 							}
 
@@ -319,7 +338,7 @@ export default function (stream) {
 										code: 'a',
 										value: obj.identifiers.reduce((acc, item) => {
 											if (item.type === 'electronic' || item.type === 'printed') {
-												return item.id;
+												acc = item.id;
 											}
 
 											return acc;
@@ -329,11 +348,11 @@ export default function (stream) {
 										code: 'q',
 										value: obj.identifiers.reduce((acc, item) => {
 											if (item.type === 'printed') {
-												return obj.formatDetails.printFormat;
+												acc = obj.formatDetails.printFormat;
 											}
 
 											if (item.type === 'electronic') {
-												return obj.formatDetails.fileFormat;
+												acc = obj.formatDetails.fileFormat;
 											}
 
 											return acc;
@@ -346,7 +365,7 @@ export default function (stream) {
 						}
 
 						function gen022() {
-							if (Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 								marcRecord.insertField({
 									tag: '022',
 									ind1: '0',
@@ -411,7 +430,7 @@ export default function (stream) {
 						}
 
 						function gen080() {
-							if (obj.type === 'dissertation' || Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.type === 'dissertation' || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
 								return;
 							}
 
@@ -442,7 +461,7 @@ export default function (stream) {
 						}
 
 						function gen084() {
-							if (obj.type === 'dissertation' || Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.type === 'dissertation' || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
 								return;
 							}
 
@@ -469,34 +488,37 @@ export default function (stream) {
 						}
 
 						function gen100() {
-							if (Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 								return;
 							}
 
-							marcRecord.insertField({
-								tag: '100',
-								ind1: '1',
-								ind2: '_',
-								subfields: [
-									{
-										code: 'a',
-										value: `${obj.authors[0].givenName}, ${obj.authors[0].familyName}` // Multiple authors ????????????
-									},
-									{
-										code: 'e',
-										value: obj.authors[0].role
-									},
-									{
-										code: 'g',
-										value: 'ENNAKKOTIETO.'
-									}
-								]
-							});
+							if (obj.authors && Object.keys(obj.authors).length > 0) {
+								marcRecord.insertField({
+									tag: '100',
+									ind1: '1',
+									ind2: '_',
+									subfields: [
+										{
+											code: 'a',
+											value: `${obj.authors[0].givenName}, ${obj.authors[0].familyName}` // Multiple authors ????????????
+										},
+										{
+											code: 'e',
+											value: obj.authors[0].role
+										},
+										{
+											code: 'g',
+											value: 'ENNAKKOTIETO.'
+										}
+									]
+								});
+							}
+
 							// ********************************* If role is 'kirjoittaja' ****************************
 						}
 
 						function gen222() {
-							if (Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 								marcRecord.insertField({
 									tag: '222',
 									ind1: '_',
@@ -559,7 +581,7 @@ export default function (stream) {
 						}
 
 						function gen250() {
-							if ((obj.formatDetails.format === 'printed' && obj.type === 'dissertation') || Object.keys(obj.seriesDetails).length > 0) {
+							if ((obj.formatDetails.format === 'printed' && obj.type === 'dissertation') || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
 								return;
 							}
 
@@ -575,7 +597,7 @@ export default function (stream) {
 						}
 
 						function gen255() {
-							if ((obj.formatDetails.format === 'printed' && obj.type === 'dissertation') || Object.keys(obj.seriesDetails).length > 0) {
+							if ((obj.formatDetails.format === 'printed' && obj.type === 'dissertation') || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
 								return;
 							}
 
@@ -610,7 +632,7 @@ export default function (stream) {
 								subfields: [
 									{
 										code: 'a',
-										value: `${obj.formatDetails.city} :` // Replace with city of a publisher
+										value: obj.formatDetails.city && `${obj.formatDetails.city} :` // Replace with city of a publisher
 									},
 									{
 										code: 'b',
@@ -618,7 +640,7 @@ export default function (stream) {
 									},
 									{
 										code: 'c',
-										value: `${obj.publicationTime.substr(0, 4)}.`
+										value: obj.publicationTime && `${obj.publicationTime.substr(0, 4)}.`
 									}
 								]
 							});
@@ -643,7 +665,7 @@ export default function (stream) {
 						}
 
 						function gen310() {
-							if (Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 								marcRecord.insertField({
 									tag: '310',
 									subfields: [
@@ -696,7 +718,7 @@ export default function (stream) {
 							});
 
 							function aValue() {
-								if (obj.formatDetails.format === 'printed' || Object.keys(obj.seriesDetails).length > 0) {
+								if (obj.formatDetails.format === 'printed' || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
 									return 'käytettävissä ilman laitetta';
 								}
 
@@ -706,7 +728,7 @@ export default function (stream) {
 							}
 
 							function bValue() {
-								if (obj.formatDetails.format === 'printed' || Object.keys(obj.seriesDetails).length > 0) {
+								if (obj.formatDetails.format === 'printed' || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
 									return 'n';
 								}
 
@@ -736,7 +758,7 @@ export default function (stream) {
 							});
 
 							function aValue() {
-								if (obj.formatDetails.format === 'printed' || Object.keys(obj.seriesDetails).length > 0) {
+								if (obj.formatDetails.format === 'printed' || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
 									return 'nide';
 								}
 
@@ -746,7 +768,7 @@ export default function (stream) {
 							}
 
 							function bValue() {
-								if (obj.formatDetails.format === 'printed' || Object.keys(obj.seriesDetails).length > 0) {
+								if (obj.formatDetails.format === 'printed' || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
 									return 'nc';
 								}
 
@@ -757,7 +779,7 @@ export default function (stream) {
 						}
 
 						function gen362() {
-							if (Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 								marcRecord.insertField({
 									tag: '362',
 									ind1: '0',
@@ -773,7 +795,7 @@ export default function (stream) {
 						}
 
 						function gen490() {
-							if (Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 								return;
 							}
 
@@ -784,22 +806,22 @@ export default function (stream) {
 								subfields: [
 									{
 										code: 'a',
-										value: `${obj.seriesDetails.title},`
+										value: obj.seriesDetails && `${obj.seriesDetails.title},`
 									},
 									{
 										code: 'x',
-										value: `${obj.seriesDetails.identifier} ;`
+										value: obj.seriesDetails && `${obj.seriesDetails.identifier} ;`
 									},
 									{
 										code: 'v',
-										value: `${obj.seriesDetails.volume}`
+										value: obj.seriesDetails && `${obj.seriesDetails.volume}`
 									}
 								]
 							});
 						}
 
 						function gen502() {
-							if (Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 								return;
 							}
 
@@ -839,7 +861,7 @@ export default function (stream) {
 								]
 							});
 
-							if (!Object.keys(obj.seriesDetails).length > 0) {
+							if (!(obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
 								marcRecord.insertField({
 									tag: '594',
 									subfields: [
@@ -857,7 +879,7 @@ export default function (stream) {
 						}
 
 						function gen700() {
-							if (Object.keys(obj.seriesDetails).length > 0 || obj.type === 'dissertation') {
+							if ((obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) || obj.type === 'dissertation') {
 								return;
 							}
 
@@ -868,11 +890,11 @@ export default function (stream) {
 								subfields: [
 									{
 										code: 'a',
-										value: `${obj.authors.givenName}, ${obj.authors.familyName}`
+										value: obj.authors && `${obj.authors.givenName}, ${obj.authors.familyName}`
 									},
 									{
 										code: 'e',
-										value: obj.authors.role // If role is 'toimittaja', 'kuvittaja', 'kääntäjä'!!
+										value: obj.authors && obj.authors.role // If role is 'toimittaja', 'kuvittaja', 'kääntäjä'!!
 									},
 									{
 										code: 'g',
@@ -883,7 +905,7 @@ export default function (stream) {
 						}
 
 						function gen710() {
-							if (Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 								marcRecord.insertField({
 									tag: '710',
 									ind1: '2',
@@ -899,7 +921,7 @@ export default function (stream) {
 						}
 
 						function gen760() {
-							if (Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 								marcRecord.insertField({
 									tag: '760',
 									ind1: '0',
@@ -966,7 +988,7 @@ export default function (stream) {
 										value: 'FENNI<KEEP>'
 									}
 								];
-								if (Object.keys(obj.seriesDetails).length > 0) {
+								if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 									subfields.push({code: 't', value: '{title from another form'}, {code: 'x', value: '{ISSN from another form'});
 									return subfields;
 								}
@@ -977,7 +999,7 @@ export default function (stream) {
 						}
 
 						function gen780() {
-							if (Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 								marcRecord.insertField({
 									tag: '780',
 									ind1: '0',
@@ -1005,7 +1027,7 @@ export default function (stream) {
 						}
 
 						function gen935() {
-							if (Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 								marcRecord.insertField({
 									tag: '935',
 									subfields: [
@@ -1025,13 +1047,9 @@ export default function (stream) {
 				}
 			});
 			pipeline.on('end', async () => {
-				try {
-					logger.log('debug', `Handled ${promises.length} recordEvents`);
-					await Promise.all(promises);
-					Emitter.emit('end', promises.length);
-				} catch (err) {
-					Emitter.emit('error', err);
-				}
+				logger.log('debug', `Handled ${promises.length} recordEvents`);
+				await Promise.all(promises);
+				Emitter.emit('end', promises.length);
 			});
 		} catch (err) {
 			Emitter.emit('error', err);
