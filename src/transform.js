@@ -202,11 +202,11 @@ export default function (stream) {
 
 								// Need to do for these format
 								if (obj.formatDetails.format === 'cd') {
-									return false;
+									// Do later
 								}
 
 								if (obj.formatDetails.format === 'printed-and-electronic') {
-									return false;
+									// Do later
 								}
 							}
 						}
