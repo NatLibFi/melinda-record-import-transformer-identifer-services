@@ -131,7 +131,7 @@ export default function (stream) {
 								return baseChars;
 
 								function value08() {
-									if (obj.type === 'dissertation' || Object.keys(obj.seriesDetails).length > 0) {
+									if (obj.type === 'dissertation' || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
 										return '^';
 									}
 
@@ -139,7 +139,7 @@ export default function (stream) {
 								}
 
 								function value07() {
-									if (Object.keys(obj.seriesDetails).length > 0) {
+									if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 										return 's';
 									}
 
@@ -171,7 +171,7 @@ export default function (stream) {
 										{index: 0, value: 'c'},
 										{index: 1, value: 'r'}
 									];
-									if (Object.keys(obj.seriesDetails).length > 0) {
+									if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 										const finalChars = new Array(21).fill(' ').map((_, index) => ({index: index + initialChars.length, value: '|'}));
 										return initialChars.concat(finalChars);
 									}
@@ -211,7 +211,7 @@ export default function (stream) {
 							function makeRules() {
 								const baseChars = [{index: 6, value: value06()}, {index: 38, value: '|'}].concat(gen0710(), gen3537());
 
-								if (Object.keys(obj.seriesDetails).length > 0) {
+								if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 									const seriesChars = [
 										{index: 19, value: 'r'},
 										{index: 21, value: 'p'},
@@ -268,7 +268,7 @@ export default function (stream) {
 								}
 
 								function value06() {
-									if (Object.keys(obj.seriesDetails).length > 0) {
+									if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 										return 'c';
 									}
 
@@ -276,7 +276,7 @@ export default function (stream) {
 								}
 
 								function gen1114() {
-									if (Object.keys(obj.seriesDetails).length > 0) {
+									if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 										return generate('9999', 11);
 									}
 								}
@@ -308,7 +308,7 @@ export default function (stream) {
 						}
 
 						function gen020() {
-							if (Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 								return;
 							}
 
@@ -346,7 +346,7 @@ export default function (stream) {
 						}
 
 						function gen022() {
-							if (Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 								marcRecord.insertField({
 									tag: '022',
 									ind1: '0',
@@ -411,7 +411,7 @@ export default function (stream) {
 						}
 
 						function gen080() {
-							if (obj.type === 'dissertation' || Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.type === 'dissertation' || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
 								return;
 							}
 
@@ -442,7 +442,7 @@ export default function (stream) {
 						}
 
 						function gen084() {
-							if (obj.type === 'dissertation' || Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.type === 'dissertation' || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
 								return;
 							}
 
@@ -469,7 +469,7 @@ export default function (stream) {
 						}
 
 						function gen100() {
-							if (Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 								return;
 							}
 
@@ -496,7 +496,7 @@ export default function (stream) {
 						}
 
 						function gen222() {
-							if (Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 								marcRecord.insertField({
 									tag: '222',
 									ind1: '_',
@@ -559,7 +559,7 @@ export default function (stream) {
 						}
 
 						function gen250() {
-							if ((obj.formatDetails.format === 'printed' && obj.type === 'dissertation') || Object.keys(obj.seriesDetails).length > 0) {
+							if ((obj.formatDetails.format === 'printed' && obj.type === 'dissertation') || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
 								return;
 							}
 
@@ -575,7 +575,7 @@ export default function (stream) {
 						}
 
 						function gen255() {
-							if ((obj.formatDetails.format === 'printed' && obj.type === 'dissertation') || Object.keys(obj.seriesDetails).length > 0) {
+							if ((obj.formatDetails.format === 'printed' && obj.type === 'dissertation') || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
 								return;
 							}
 
@@ -643,7 +643,7 @@ export default function (stream) {
 						}
 
 						function gen310() {
-							if (Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 								marcRecord.insertField({
 									tag: '310',
 									subfields: [
@@ -696,7 +696,7 @@ export default function (stream) {
 							});
 
 							function aValue() {
-								if (obj.formatDetails.format === 'printed' || Object.keys(obj.seriesDetails).length > 0) {
+								if (obj.formatDetails.format === 'printed' || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
 									return 'käytettävissä ilman laitetta';
 								}
 
@@ -706,7 +706,7 @@ export default function (stream) {
 							}
 
 							function bValue() {
-								if (obj.formatDetails.format === 'printed' || Object.keys(obj.seriesDetails).length > 0) {
+								if (obj.formatDetails.format === 'printed' || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
 									return 'n';
 								}
 
@@ -736,7 +736,7 @@ export default function (stream) {
 							});
 
 							function aValue() {
-								if (obj.formatDetails.format === 'printed' || Object.keys(obj.seriesDetails).length > 0) {
+								if (obj.formatDetails.format === 'printed' || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
 									return 'nide';
 								}
 
@@ -746,7 +746,7 @@ export default function (stream) {
 							}
 
 							function bValue() {
-								if (obj.formatDetails.format === 'printed' || Object.keys(obj.seriesDetails).length > 0) {
+								if (obj.formatDetails.format === 'printed' || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
 									return 'nc';
 								}
 
@@ -757,7 +757,7 @@ export default function (stream) {
 						}
 
 						function gen362() {
-							if (Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 								marcRecord.insertField({
 									tag: '362',
 									ind1: '0',
@@ -773,7 +773,7 @@ export default function (stream) {
 						}
 
 						function gen490() {
-							if (Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 								return;
 							}
 
@@ -799,7 +799,7 @@ export default function (stream) {
 						}
 
 						function gen502() {
-							if (Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 								return;
 							}
 
@@ -839,7 +839,7 @@ export default function (stream) {
 								]
 							});
 
-							if (!Object.keys(obj.seriesDetails).length > 0) {
+							if (!obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 								marcRecord.insertField({
 									tag: '594',
 									subfields: [
@@ -857,7 +857,7 @@ export default function (stream) {
 						}
 
 						function gen700() {
-							if (Object.keys(obj.seriesDetails).length > 0 || obj.type === 'dissertation') {
+							if ((obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) || obj.type === 'dissertation') {
 								return;
 							}
 
@@ -883,7 +883,7 @@ export default function (stream) {
 						}
 
 						function gen710() {
-							if (Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 								marcRecord.insertField({
 									tag: '710',
 									ind1: '2',
@@ -899,7 +899,7 @@ export default function (stream) {
 						}
 
 						function gen760() {
-							if (Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 								marcRecord.insertField({
 									tag: '760',
 									ind1: '0',
@@ -966,7 +966,7 @@ export default function (stream) {
 										value: 'FENNI<KEEP>'
 									}
 								];
-								if (Object.keys(obj.seriesDetails).length > 0) {
+								if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 									subfields.push({code: 't', value: '{title from another form'}, {code: 'x', value: '{ISSN from another form'});
 									return subfields;
 								}
@@ -977,7 +977,7 @@ export default function (stream) {
 						}
 
 						function gen780() {
-							if (Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 								marcRecord.insertField({
 									tag: '780',
 									ind1: '0',
@@ -1005,7 +1005,7 @@ export default function (stream) {
 						}
 
 						function gen935() {
-							if (Object.keys(obj.seriesDetails).length > 0) {
+							if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
 								marcRecord.insertField({
 									tag: '935',
 									subfields: [

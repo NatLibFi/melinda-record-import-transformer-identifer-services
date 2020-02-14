@@ -1,0 +1,37 @@
+[{
+    "identifiers": [
+    {
+    "id": "978-951-51-5672-3",
+    "type": "printed"
+    },
+    {
+    "id": "978-951-51-5673-0",
+    "type": "electronic"
+    }
+    ],
+    "title": "Ion exchange in nuclear fuel reprocessing - zirconium phosphate materials for the separation of trivalent actinides and lanthanides",
+    "language": "eng",
+    "type": "dissertation",
+    "publicationTime": "2019-12-11T00:00:00.000+02:00",
+    "isPublic": false,
+    "additionalDetails": "Väitöskirjani, joka tulee julkaistavaksi painettuna (Unigrafia) ja sähköisenä (Helsingin yliopiston palvelu e-thesis)",
+    "authors": [
+    {
+    "givenName": "Elmo",
+    "familyName": "Wiikinkoski",
+    "role": "author"
+    }
+    ],
+    "formatDetails": {
+    "format": "electronic",
+    "printFormat": "paperback",
+    "fileFormat": "pdf",
+    "manufacturer": "Unigrafia",
+    "city": "Helsinki"
+    },
+    "seriesDetails": {
+    "title": "Report series in radiochemistry",
+    "identifier": "0358-7746",
+    "volume": 42
+    }
+    }]
