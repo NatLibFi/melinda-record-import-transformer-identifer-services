@@ -153,7 +153,7 @@ export default function (stream) {
 								}
 
 								/* eslint array-callback-return: "error" */
-								return false;
+								return _;
 							});
 
 							marcRecord.insertField({
@@ -161,43 +161,27 @@ export default function (stream) {
 							});
 							// ************************ $33 fiction/non-fiction/cartoon not implemented yet **************************************
 							function makeRules() {
-								const result = [];
 								if (obj.formatDetails.format === 'electronic') {
-									for (let i = 0; i <= 23; i++) {
-										if (i === 0) {
-											result.push({index: i, value: 'c'});
-										}
-
-										if (i === 1) {
-											result.push({index: i, value: 'r'});
-										}
-
-										if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
-											result.push({index: i, value: '|'});
-										}
-
-										result.push({index: i, value: ' '});
+									const initialChars = [
+										{index: 0, value: 'c'},
+										{index: 1, value: 'r'}
+									];
+									if (Object.keys(obj.seriesDetails).length > 0) {
+										const finalChars = new Array(21).fill(' ').map((_, index) => ({index: index + initialChars.length, value: '|'}));
+										return initialChars.concat(finalChars);
 									}
 
-									return result;
+									const finalChars = new Array(21).fill(' ').map((_, index) => ({index: index + initialChars.length, value: ' '}));
+									return initialChars.concat(finalChars);
 								}
 
 								if (obj.formatDetails.format === 'printed') {
-									if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length) > 0) {
-										for (let i = 0; i <= 23; i++) {
-											if (i === 0) {
-												result.push({index: i, value: 't'});
-											}
-
-											if (i === 1) {
-												result.push({index: i, value: 'a'});
-											}
-
-											result.push({index: i, value: ' '});
-										}
-									}
-
-									return result;
+									const initialChars = [
+										{index: 0, value: 't'},
+										{index: 1, value: 'a'}
+									];
+									const finalChars = new Array(21).fill(' ').map((_, index) => ({index: index + initialChars.length, value: ' '}));
+									return initialChars.concat(finalChars);
 								}
 
 								// Need to do for these format
@@ -338,7 +322,7 @@ export default function (stream) {
 										code: 'a',
 										value: obj.identifiers.reduce((acc, item) => {
 											if (item.type === 'electronic' || item.type === 'printed') {
-												acc = item.id;
+												return item.id;
 											}
 
 											return acc;
@@ -348,11 +332,11 @@ export default function (stream) {
 										code: 'q',
 										value: obj.identifiers.reduce((acc, item) => {
 											if (item.type === 'printed') {
-												acc = obj.formatDetails.printFormat;
+												return obj.formatDetails.printFormat;
 											}
 
 											if (item.type === 'electronic') {
-												acc = obj.formatDetails.fileFormat;
+												return obj.formatDetails.fileFormat;
 											}
 
 											return acc;
