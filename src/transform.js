@@ -148,12 +148,7 @@ export default function (stream) {
 							const rules = makeRules();
 							const chars = new Array(23).fill(' ').map((_, index) => {
 								const entry = rules.find(({index: ruleIndex}) => ruleIndex === index);
-								if (entry) {
-									return entry.value;
-								}
-
-								/* eslint array-callback-return: "error" */
-								return _;
+								return entry && entry.value;
 							});
 
 							marcRecord.insertField({
