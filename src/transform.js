@@ -367,7 +367,7 @@ export default function (stream) {
 		}
 
 		function gen022() {
-			if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+			if (obj.identifier.length === 9) {
 				marcRecord.insertField({
 					tag: '022',
 					ind1: '0',
@@ -375,7 +375,7 @@ export default function (stream) {
 					subfields: [
 						{
 							code: 'a',
-							value: '{ISSN id}'
+							value: `${obj.identifier}`
 						},
 						{
 							code: '2',
