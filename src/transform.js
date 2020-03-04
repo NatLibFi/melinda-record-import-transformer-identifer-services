@@ -329,7 +329,8 @@ export default function (stream) {
 		}
 
 		function gen020() {
-			if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+			// Checking if issn or isbn-ismn
+			if (obj.identifier.length === 9) {
 				return;
 			}
 
@@ -375,7 +376,7 @@ export default function (stream) {
 					subfields: [
 						{
 							code: 'a',
-							value: '{ISSN id}'
+							value: 'ISSN'
 						},
 						{
 							code: '2',
@@ -414,7 +415,7 @@ export default function (stream) {
 				ind2: '_',
 				subfields: [{
 					code: 'a',
-					value: obj.language
+					value: ''
 				}]
 			});
 		}
@@ -432,7 +433,7 @@ export default function (stream) {
 		}
 
 		function gen080() {
-			if (obj.type === 'dissertation' || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
+			if (obj.type === 'dissertation' || (obj.identifier.length === 9)) {
 				return;
 			}
 
@@ -459,11 +460,12 @@ export default function (stream) {
 					}
 				]
 			});
+
 			// ********************* If cartoon is not implemented yet *************************
 		}
 
 		function gen084() {
-			if (obj.type === 'dissertation' || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
+			if (obj.type === 'dissertation' || (obj.identifier.length === 9)) {
 				return;
 			}
 
@@ -528,7 +530,7 @@ export default function (stream) {
 					subfields: [
 						{
 							code: 'a',
-							value: '{keytitle}'
+							value: ''
 						},
 						{
 							code: 'b',
@@ -583,35 +585,31 @@ export default function (stream) {
 		}
 
 		function gen250() {
-			if ((obj.formatDetails.format === 'printed' && obj.type === 'dissertation') || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
-				return;
+			if (obj.type === 'book' && obj.identifier.length === 9) {
+				marcRecord.insertField({
+					tag: '250',
+					subfields: [
+						{
+							code: 'a',
+							value: '.' // To be added later
+						}
+					]
+				});
 			}
-
-			marcRecord.insertField({
-				tag: '250',
-				subfields: [
-					{
-						code: 'a',
-						value: '{edition}'
-					}
-				]
-			});
 		}
 
 		function gen255() {
-			if ((obj.formatDetails.format === 'printed' && obj.type === 'dissertation') || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
-				return;
+			if ((obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic') && obj.type === 'book' && obj.identifier.length === 9) {
+				marcRecord.insertField({
+					tag: '255',
+					subfields: [
+						{
+							code: 'a',
+							value: '{edition}' // Scale, for example a map on a scale of 15:000
+						}
+					]
+				});
 			}
-
-			marcRecord.insertField({
-				tag: '255',
-				subfields: [
-					{
-						code: 'a',
-						value: '{edition}' // Scale, for example a map on a scale of 15:000
-					}
-				]
-			});
 		}
 
 		function gen263() {
@@ -936,11 +934,11 @@ export default function (stream) {
 				const subfields = [
 					{
 						code: 't',
-						value: '{title of the main series}' // If publication is part of main series
+						value: `${obj.seriesDetails.mainSeries.title}` // If publication is part of main series
 					},
 					{
 						code: 'x',
-						value: '{ISSN of main series}' // If publication is part of main series
+						value: `${obj.seriesDetails.mainSeries.identifier}` // If publication is part of main series
 					},
 					{
 						code: '9',
@@ -1009,7 +1007,7 @@ export default function (stream) {
 					subfields: [
 						{
 							code: 't',
-							value: '{title of the previously issued series}'
+							value: `${obj.previousPublication.title}`
 						},
 						{
 							code: 'c',
@@ -1017,7 +1015,7 @@ export default function (stream) {
 						},
 						{
 							code: 'x',
-							value: '{ISSN of the previously issued series}'
+							value: `${obj.previousPublication.identifier}`
 						},
 						{
 							code: '9',
