@@ -146,7 +146,7 @@ export default function (stream) {
 				return baseChars;
 
 				function value08() {
-					if (obj.type === 'dissertation' || (obj.seriesDetails && (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)))) {
+					if (obj.type === 'dissertation' || (obj.seriesDetails && (obj.identifier.length === 9))) {
 						return '^';
 					}
 
@@ -154,7 +154,7 @@ export default function (stream) {
 				}
 
 				function value07() {
-					if (obj.seriesDetails && (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
+					if (obj.seriesDetails && (obj.identifier.length === 9)) {
 						return 's';
 					}
 
@@ -230,9 +230,12 @@ export default function (stream) {
 
 			// ************************ $33 fiction/non-fiction/cartoon not implemented yet **************************************
 			function makeRules() {
-				const baseChars = [{index: 6, value: value06()}, {index: 38, value: '|'}].concat(gen0710(), gen3537());
+				// Works in a condition when there is no publication time in Issn. Need to check this later
+				const baseChars = obj.publicationTime ?
+					[{index: 6, value: value06()}, {index: 38, value: '|'}].concat(gen0710(), gen3537()) :
+					[{index: 6, value: value06()}, {index: 38, value: '|'}].concat(gen3537());
 
-				if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+				if (obj.identifier.length === 9) {
 					const seriesChars = [
 						{index: 19, value: 'r'},
 						{index: 21, value: 'p'},
@@ -289,7 +292,7 @@ export default function (stream) {
 				}
 
 				function value06() {
-					if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+					if (obj.identifier.length === 9) {
 						return 'c';
 					}
 
@@ -297,7 +300,7 @@ export default function (stream) {
 				}
 
 				function gen1114() {
-					if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+					if (obj.identifier.length === 9) {
 						return generate('9999', 11);
 					}
 				}
@@ -329,7 +332,7 @@ export default function (stream) {
 		}
 
 		function gen020() {
-			if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+			if (obj.identifier.length === 9) {
 				return;
 			}
 
@@ -432,7 +435,7 @@ export default function (stream) {
 		}
 
 		function gen080() {
-			if (obj.type === 'dissertation' || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
+			if (obj.type === 'dissertation' || (obj.identifier.length === 9)) {
 				return;
 			}
 
@@ -463,7 +466,7 @@ export default function (stream) {
 		}
 
 		function gen084() {
-			if (obj.type === 'dissertation' || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
+			if (obj.type === 'dissertation' || (obj.identifier.length === 9)) {
 				return;
 			}
 
@@ -490,7 +493,7 @@ export default function (stream) {
 		}
 
 		function gen100() {
-			if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+			if (obj.identifier.length === 9) {
 				return;
 			}
 
@@ -520,7 +523,7 @@ export default function (stream) {
 		}
 
 		function gen222() {
-			if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+			if (obj.identifier.length === 9) {
 				marcRecord.insertField({
 					tag: '222',
 					ind1: '_',
@@ -583,7 +586,7 @@ export default function (stream) {
 		}
 
 		function gen250() {
-			if ((obj.formatDetails.format === 'printed' && obj.type === 'dissertation') || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
+			if ((obj.formatDetails.format === 'printed' && obj.type === 'dissertation') || (obj.identifier.length === 9)) {
 				return;
 			}
 
@@ -599,7 +602,7 @@ export default function (stream) {
 		}
 
 		function gen255() {
-			if ((obj.formatDetails.format === 'printed' && obj.type === 'dissertation') || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
+			if ((obj.formatDetails.format === 'printed' && obj.type === 'dissertation') || (obj.identifier.length === 9)) {
 				return;
 			}
 
@@ -667,7 +670,7 @@ export default function (stream) {
 		}
 
 		function gen310() {
-			if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+			if (obj.identifier.length === 9) {
 				marcRecord.insertField({
 					tag: '310',
 					subfields: [
@@ -720,7 +723,7 @@ export default function (stream) {
 			});
 
 			function aValue() {
-				if (obj.formatDetails.format === 'printed' || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
+				if (obj.formatDetails.format === 'printed' || (obj.identifier.length === 9)) {
 					return 'käytettävissä ilman laitetta';
 				}
 
@@ -730,7 +733,7 @@ export default function (stream) {
 			}
 
 			function bValue() {
-				if (obj.formatDetails.format === 'printed' || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
+				if (obj.formatDetails.format === 'printed' || (obj.identifier.length === 9)) {
 					return 'n';
 				}
 
@@ -760,7 +763,7 @@ export default function (stream) {
 			});
 
 			function aValue() {
-				if (obj.formatDetails.format === 'printed' || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
+				if (obj.formatDetails.format === 'printed' || (obj.identifier.length === 9)) {
 					return 'nide';
 				}
 
@@ -770,7 +773,7 @@ export default function (stream) {
 			}
 
 			function bValue() {
-				if (obj.formatDetails.format === 'printed' || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
+				if (obj.formatDetails.format === 'printed' || (obj.identifier.length === 9)) {
 					return 'nc';
 				}
 
@@ -781,7 +784,7 @@ export default function (stream) {
 		}
 
 		function gen362() {
-			if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+			if (obj.identifier.length === 9) {
 				marcRecord.insertField({
 					tag: '362',
 					ind1: '0',
@@ -797,7 +800,7 @@ export default function (stream) {
 		}
 
 		function gen490() {
-			if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+			if (obj.identifier.length === 9) {
 				return;
 			}
 
@@ -823,7 +826,7 @@ export default function (stream) {
 		}
 
 		function gen502() {
-			if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+			if (obj.identifier.length === 9) {
 				return;
 			}
 
@@ -863,7 +866,7 @@ export default function (stream) {
 				]
 			});
 
-			if (!(obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
+			if (!(obj.identifier.length === 9)) {
 				marcRecord.insertField({
 					tag: '594',
 					subfields: [
@@ -881,7 +884,7 @@ export default function (stream) {
 		}
 
 		function gen700() {
-			if ((obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) || obj.type === 'dissertation') {
+			if ((obj.identifier.length === 9) || obj.type === 'dissertation') {
 				return;
 			}
 
@@ -907,7 +910,7 @@ export default function (stream) {
 		}
 
 		function gen710() {
-			if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+			if (obj.identifier.length === 9) {
 				marcRecord.insertField({
 					tag: '710',
 					ind1: '2',
@@ -923,7 +926,7 @@ export default function (stream) {
 		}
 
 		function gen760() {
-			if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+			if (obj.identifier.length === 9) {
 				marcRecord.insertField({
 					tag: '760',
 					ind1: '0',
@@ -990,7 +993,7 @@ export default function (stream) {
 						value: 'FENNI<KEEP>'
 					}
 				];
-				if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+				if (obj.identifier.length === 9) {
 					subfields.push({code: 't', value: '{title from another form'}, {code: 'x', value: '{ISSN from another form'});
 					return subfields;
 				}
@@ -1001,7 +1004,7 @@ export default function (stream) {
 		}
 
 		function gen780() {
-			if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+			if (obj.identifier.length === 9) {
 				marcRecord.insertField({
 					tag: '780',
 					ind1: '0',
@@ -1029,7 +1032,7 @@ export default function (stream) {
 		}
 
 		function gen935() {
-			if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+			if (obj.identifier.length === 9) {
 				marcRecord.insertField({
 					tag: '935',
 					subfields: [
