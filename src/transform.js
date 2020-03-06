@@ -146,7 +146,7 @@ export default function (stream) {
 				return baseChars;
 
 				function value08() {
-					if (obj.type === 'dissertation' || (obj.seriesDetails && (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)))) {
+					if (obj.type === 'dissertation' || (obj.seriesDetails && (obj.publicationType === 'issn'))) {
 						return '^';
 					}
 
@@ -154,7 +154,7 @@ export default function (stream) {
 				}
 
 				function value07() {
-					if (obj.seriesDetails && (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
+					if (obj.seriesDetails && (obj.publicationType === 'issn')) {
 						return 's';
 					}
 
@@ -230,9 +230,12 @@ export default function (stream) {
 
 			// ************************ $33 fiction/non-fiction/cartoon not implemented yet **************************************
 			function makeRules() {
-				const baseChars = [{index: 6, value: value06()}, {index: 38, value: '|'}].concat(gen0710(), gen3537());
+				// Works in a condition when there is no publication time in Issn. Need to check this later
+				const baseChars = obj.publicationTime ?
+					[{index: 6, value: value06()}, {index: 38, value: '|'}].concat(gen0710(), gen3537()) :
+					[{index: 6, value: value06()}, {index: 38, value: '|'}].concat(gen3537());
 
-				if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+				if (obj.publicationType === 'issn') {
 					const seriesChars = [
 						{index: 19, value: 'r'},
 						{index: 21, value: 'p'},
@@ -289,7 +292,7 @@ export default function (stream) {
 				}
 
 				function value06() {
-					if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+					if (obj.publicationType === 'issn') {
 						return 'c';
 					}
 
@@ -297,7 +300,7 @@ export default function (stream) {
 				}
 
 				function gen1114() {
-					if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+					if (obj.publicationType === 'issn') {
 						return generate('9999', 11);
 					}
 				}
@@ -329,8 +332,7 @@ export default function (stream) {
 		}
 
 		function gen020() {
-			// Checking if issn or isbn-ismn
-			if (obj.identifier.length === 9) {
+			if (obj.publicationType === 'issn') {
 				return;
 			}
 
@@ -368,7 +370,7 @@ export default function (stream) {
 		}
 
 		function gen022() {
-			if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+			if (obj.publicationType === 'issn') {
 				marcRecord.insertField({
 					tag: '022',
 					ind1: '0',
@@ -376,7 +378,7 @@ export default function (stream) {
 					subfields: [
 						{
 							code: 'a',
-							value: 'ISSN'
+							value: `${obj.identifier}`
 						},
 						{
 							code: '2',
@@ -433,7 +435,7 @@ export default function (stream) {
 		}
 
 		function gen080() {
-			if (obj.type === 'dissertation' || (obj.identifier.length === 9)) {
+			if (obj.type === 'dissertation' || (obj.publicationType === 'issn')) {
 				return;
 			}
 
@@ -465,7 +467,7 @@ export default function (stream) {
 		}
 
 		function gen084() {
-			if (obj.type === 'dissertation' || (obj.identifier.length === 9)) {
+			if (obj.type === 'dissertation' || (obj.publicationType === 'issn')) {
 				return;
 			}
 
@@ -492,7 +494,7 @@ export default function (stream) {
 		}
 
 		function gen100() {
-			if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+			if (obj.publicationType === 'issn') {
 				return;
 			}
 
@@ -522,7 +524,7 @@ export default function (stream) {
 		}
 
 		function gen222() {
-			if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+			if (obj.publicationType === 'issn') {
 				marcRecord.insertField({
 					tag: '222',
 					ind1: '_',
@@ -585,31 +587,35 @@ export default function (stream) {
 		}
 
 		function gen250() {
-			if (obj.type === 'book' && obj.identifier.length === 9) {
-				marcRecord.insertField({
-					tag: '250',
-					subfields: [
-						{
-							code: 'a',
-							value: '.' // To be added later
-						}
-					]
-				});
+			if ((obj.formatDetails.format === 'printed' && obj.type === 'dissertation') || (obj.publicationType === 'issn')) {
+				return;
 			}
+
+			marcRecord.insertField({
+				tag: '250',
+				subfields: [
+					{
+						code: 'a',
+						value: '.' // To be added later
+					}
+				]
+			});
 		}
 
 		function gen255() {
-			if ((obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic') && obj.type === 'book' && obj.identifier.length === 9) {
-				marcRecord.insertField({
-					tag: '255',
-					subfields: [
-						{
-							code: 'a',
-							value: '{edition}' // Scale, for example a map on a scale of 15:000
-						}
-					]
-				});
+			if ((obj.formatDetails.format === 'printed' && obj.type === 'dissertation') || (obj.publicationType === 'issn')) {
+				return;
 			}
+
+			marcRecord.insertField({
+				tag: '255',
+				subfields: [
+					{
+						code: 'a',
+						value: '{edition}' // Scale, for example a map on a scale of 15:000
+					}
+				]
+			});
 		}
 
 		function gen263() {
@@ -665,7 +671,7 @@ export default function (stream) {
 		}
 
 		function gen310() {
-			if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+			if (obj.publicationType === 'issn') {
 				marcRecord.insertField({
 					tag: '310',
 					subfields: [
@@ -704,11 +710,11 @@ export default function (stream) {
 				subfields: [
 					{
 						code: 'a',
-						value: aValue()
+						value: aValue('a')
 					},
 					{
 						code: 'b',
-						value: bValue()
+						value: aValue('b')
 					},
 					{
 						code: '2',
@@ -717,23 +723,70 @@ export default function (stream) {
 				]
 			});
 
-			function aValue() {
-				if (obj.formatDetails.format === 'printed' || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
-					return 'käytettävissä ilman laitetta';
+			// eslint-disable-next-line complexity
+			function aValue(val) {
+				if (obj.publicationType === 'isbn-ismn') {
+					if (obj.formatDetails.format === 'printed' && (obj.type === 'dissertation' || obj.type === 'book')) {
+						if (val === 'a') {
+							return 'käytettävissä ilman laitetta';
+						}
+
+						if (val === 'b') {
+							return 'n';
+						}
+					}
+
+					if (obj.formatDetails.format === 'electronic' && (obj.type === 'dissertation' || obj.type === 'book')) {
+						if (val === 'a') {
+							return 'tietokonekäyttöinen';
+						}
+
+						if (val === 'b') {
+							return 'c';
+						}
+					}
+
+					if (obj.formatDetails.format === 'audio' && obj.type === 'book') {
+						if (val === 'a') {
+							return 'audio';
+						}
+
+						if (val === 'b') {
+							return 's';
+						}
+					}
 				}
 
-				if (obj.formatDetails.format === 'electronic') {
-					return 'tietokonekäyttöinen';
-				}
-			}
+				if (obj.publicationType === 'issn') {
+					if (obj.formatDetails.format === 'printed') {
+						if (val === 'a') {
+							return 'käytettävissä ilman laitetta';
+						}
 
-			function bValue() {
-				if (obj.formatDetails.format === 'printed' || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
-					return 'n';
-				}
+						if (val === 'b') {
+							return 'n';
+						}
+					}
 
-				if (obj.formatDetails.format === 'electronic') {
-					return 'c';
+					if (obj.formatDetails.format === 'electronic') {
+						if (val === 'a') {
+							return 'tietokonekäyttöinen';
+						}
+
+						if (val === 'b') {
+							return 'c';
+						}
+					}
+
+					if (obj.formatDetails.format === 'audio') {
+						if (val === 'a') {
+							return 'audio';
+						}
+
+						if (val === 'b') {
+							return 's';
+						}
+					}
 				}
 			}
 		}
@@ -758,7 +811,7 @@ export default function (stream) {
 			});
 
 			function aValue() {
-				if (obj.formatDetails.format === 'printed' || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
+				if (obj.formatDetails.format === 'printed' || (obj.publicationType === 'issn')) {
 					return 'nide';
 				}
 
@@ -768,7 +821,7 @@ export default function (stream) {
 			}
 
 			function bValue() {
-				if (obj.formatDetails.format === 'printed' || (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
+				if (obj.formatDetails.format === 'printed' || (obj.publicationType === 'issn')) {
 					return 'nc';
 				}
 
@@ -779,7 +832,7 @@ export default function (stream) {
 		}
 
 		function gen362() {
-			if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+			if (obj.publicationType === 'issn') {
 				marcRecord.insertField({
 					tag: '362',
 					ind1: '0',
@@ -787,7 +840,7 @@ export default function (stream) {
 					subfields: [
 						{
 							code: 'a',
-							value: `${obj.seriesDetails.volume},`
+							value: 'To do later' // No number or volume in schema for ISSN there is main series and sub series with title and identifier
 						}
 					]
 				});
@@ -795,7 +848,7 @@ export default function (stream) {
 		}
 
 		function gen490() {
-			if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+			if (obj.publicationType === 'issn') {
 				return;
 			}
 
@@ -821,21 +874,21 @@ export default function (stream) {
 		}
 
 		function gen502() {
-			if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+			if (obj.publicationType === 'issn') {
 				return;
 			}
 
-			if (obj.type === 'dissertation') {
+			if ((obj.formatDetails.format === 'electronic' || obj.formatDetails.format === 'printed') && obj.type === 'dissertation') {
 				marcRecord.insertField({
 					tag: '502',
 					subfields: [
 						{
 							code: 'a',
-							value: `${obj.seriesDetails.title},`
+							value: `${obj.type},`
 						},
 						{
 							code: 'c',
-							value: '{name of the university, ends with period}'
+							value: '{name of the university, ends with period}' // No university field in schema provided
 						},
 						{
 							code: '9',
@@ -861,7 +914,7 @@ export default function (stream) {
 				]
 			});
 
-			if (!(obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0))) {
+			if (!(obj.publicationType === 'issn')) {
 				marcRecord.insertField({
 					tag: '594',
 					subfields: [
@@ -879,7 +932,7 @@ export default function (stream) {
 		}
 
 		function gen700() {
-			if ((obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) || obj.type === 'dissertation') {
+			if ((obj.publicationType === 'issn') || obj.type === 'dissertation') {
 				return;
 			}
 
@@ -890,11 +943,11 @@ export default function (stream) {
 				subfields: [
 					{
 						code: 'a',
-						value: obj.authors && `${obj.authors.givenName}, ${obj.authors.familyName}`
+						value: `${obj.authors[0].givenName}, ${obj.authors[0].familyName}`
 					},
 					{
 						code: 'e',
-						value: obj.authors && obj.authors.role // If role is 'toimittaja', 'kuvittaja', 'kääntäjä'!!
+						value: obj.authors[0].role
 					},
 					{
 						code: 'g',
@@ -905,7 +958,7 @@ export default function (stream) {
 		}
 
 		function gen710() {
-			if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+			if (obj.publicationType === 'issn') {
 				marcRecord.insertField({
 					tag: '710',
 					ind1: '2',
@@ -913,7 +966,7 @@ export default function (stream) {
 					subfields: [
 						{
 							code: 'a',
-							value: `${obj.publisher}.` // Ends with period
+							value: `${obj.publisher}.`
 						}
 					]
 				});
@@ -921,7 +974,7 @@ export default function (stream) {
 		}
 
 		function gen760() {
-			if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+			if (obj.publicationType === 'issn') {
 				marcRecord.insertField({
 					tag: '760',
 					ind1: '0',
@@ -934,11 +987,11 @@ export default function (stream) {
 				const subfields = [
 					{
 						code: 't',
-						value: `${obj.seriesDetails.mainSeries.title}` // If publication is part of main series
+						value: `${obj.seriesDetails.mainSeries.title}`
 					},
 					{
 						code: 'x',
-						value: `${obj.seriesDetails.mainSeries.identifier}` // If publication is part of main series
+						value: `${obj.seriesDetails.mainSeries.identifier}`
 					},
 					{
 						code: '9',
@@ -946,15 +999,9 @@ export default function (stream) {
 					}
 				];
 
-				if (obj.formatDetails.format === 'printed') {
+				if (obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic' || obj.formatDetails.format === 'serial') {
 					return subfields;
 				}
-
-				subfields.push({
-					code: 'c',
-					value: '{}' // Not Defined in description
-				});
-				return subfields;
 			}
 		}
 
@@ -988,8 +1035,8 @@ export default function (stream) {
 						value: 'FENNI<KEEP>'
 					}
 				];
-				if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
-					subfields.push({code: 't', value: '{title from another form'}, {code: 'x', value: '{ISSN from another form'});
+				if (obj.publicationType === 'issn') {
+					subfields.push({code: 't', value: '{title from another form'}, {code: 'x', value: '{ISSN from another form'}); // Another Form not clear
 					return subfields;
 				}
 
@@ -999,7 +1046,7 @@ export default function (stream) {
 		}
 
 		function gen780() {
-			if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+			if (obj.publicationType === 'issn') {
 				marcRecord.insertField({
 					tag: '780',
 					ind1: '0',
@@ -1027,7 +1074,7 @@ export default function (stream) {
 		}
 
 		function gen935() {
-			if (obj.seriesDetails && (Object.keys(obj.seriesDetails).length > 0)) {
+			if (obj.publicationType === 'issn') {
 				marcRecord.insertField({
 					tag: '935',
 					subfields: [
