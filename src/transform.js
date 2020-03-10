@@ -341,27 +341,11 @@ export default function (stream) {
 					subfields: [
 						{
 							code: 'a',
-							value: obj.identifiers.reduce((acc, item) => {
-								if (item.type === 'electronic' || item.type === 'printed') {
-									return item.id;
-								}
-
-								return acc;
-							}, '')
+							value: 'to do later' // Not clear specification
 						},
 						{
 							code: 'q',
-							value: obj.identifiers.reduce((acc, item) => {
-								if (item.type === 'printed') {
-									return obj.formatDetails.printFormat;
-								}
-
-								if (item.type === 'electronic') {
-									return obj.formatDetails.fileFormat;
-								}
-
-								return acc;
-							}, '')
+							value: 'to do later' // Not clear specification
 						}
 
 					]
@@ -394,7 +378,7 @@ export default function (stream) {
 
 		function gen040() {
 			if ((obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic' || obj.formatDetails.format === 'audio') && (obj.type === 'book' || obj.type === 'dissertation' || obj.type === 'serial')) {
-				marcRecord.insertField({
+				return marcRecord.insertField({
 					tag: '040',
 					subfields: [
 						{
@@ -416,7 +400,7 @@ export default function (stream) {
 
 		function gen041() {
 			if ((obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic' || obj.formatDetails.format === 'audio') && (obj.type === 'book' || obj.type === 'dissertation' || obj.type === 'serial')) {
-				marcRecord.insertField({
+				return marcRecord.insertField({
 					tag: '041',
 					ind1: '0',
 					ind2: '_',
@@ -438,7 +422,7 @@ export default function (stream) {
 
 		function gen042() {
 			if ((obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic' || obj.formatDetails.format === 'audio') && (obj.type === 'book' || obj.type === 'dissertation' || obj.type === 'serial')) {
-				marcRecord.insertField({
+				return marcRecord.insertField({
 					tag: '042',
 					subfields: [
 						{
@@ -484,7 +468,7 @@ export default function (stream) {
 
 		function gen084() {
 			if (obj.publicationType === 'isbn-ismn' && (obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic')) {
-				marcRecord.insertField({
+				return marcRecord.insertField({
 					tag: '084',
 					ind1: '_',
 					ind2: '_',
@@ -511,18 +495,19 @@ export default function (stream) {
 		function gen100() {
 			if (obj.publicationType === 'isbn-ismn' && obj.authors.some(item => item.role === 'author')) {
 				if ((obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic' || obj.formatDetails.format === 'audio') && (obj.type === 'dissertation' || obj.type === 'book')) {
-					marcRecord.insertField({
+					const author = obj.authors.filter(item => item.role === 'author');
+					return marcRecord.insertField({
 						tag: '100',
 						ind1: '1',
 						ind2: '_',
 						subfields: [
 							{
 								code: 'a',
-								value: filterAuthor('a')
+								value: `${author[0].givenName} ${author[0].familyName}`
 							},
 							{
 								code: 'e',
-								value: filterAuthor('b')
+								value: author[0].role
 							},
 							{
 								code: 'g',
@@ -532,25 +517,12 @@ export default function (stream) {
 					});
 				}
 			}
-
-			function filterAuthor(val) {
-				const author = obj.authors.filter(item => item.role === 'author');
-				if (val === 'a') {
-					return `${author[0].givenName} ${author[0].familyName}`;
-				}
-
-				if (val === 'b') {
-					return `${author[0].role}`;
-				}
-			}
-
-			// ********************************* If role is 'kirjoittaja' ****************************
 		}
 
 		function gen222() {
 			if (obj.publicationType === 'issn') {
 				if ((obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic' || obj.formatDetails.format === 'audio') && obj.type === 'serial') {
-					marcRecord.insertField({
+					return marcRecord.insertField({
 						tag: '222',
 						ind1: '_',
 						ind2: '0',
@@ -583,7 +555,7 @@ export default function (stream) {
 		function gen245() {
 			if (obj.publicationType === 'isbn-ismn' || obj.publicationType === 'issn') {
 				if ((obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic' || obj.formatDetails.format === 'audio') && (obj.type === 'book' || obj.type === 'dissertation' || obj.type === 'serial')) {
-					marcRecord.insertField({
+					return marcRecord.insertField({
 						tag: '245',
 						ind1: ind1(),
 						ind2: '0',
@@ -613,7 +585,7 @@ export default function (stream) {
 		function gen250() {
 			if (obj.publicationType === 'isbn-ismn') {
 				if ((obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic') && obj.type === 'book') {
-					marcRecord.insertField({
+					return marcRecord.insertField({
 						tag: '250',
 						subfields: [
 							{
@@ -629,7 +601,7 @@ export default function (stream) {
 		function gen255() {
 			if (obj.publicationType === 'isbn-ismn') {
 				if ((obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic') && obj.type === 'book') {
-					marcRecord.insertField({
+					return marcRecord.insertField({
 						tag: '255',
 						subfields: [
 							{
@@ -690,7 +662,7 @@ export default function (stream) {
 			});
 
 			if (obj.formatDetails.format === 'printed') {
-				marcRecord.insertField({
+				return marcRecord.insertField({
 					tag: '264',
 					ind1: '_',
 					ind2: '3',
@@ -711,7 +683,7 @@ export default function (stream) {
 		function gen310() {
 			if (obj.publicationType === 'issn') {
 				if ((obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic' || obj.formatDetails.format === 'audio') && obj.type === 'serial') {
-					marcRecord.insertField({
+					return marcRecord.insertField({
 						tag: '310',
 						subfields: [
 							{
@@ -951,7 +923,7 @@ export default function (stream) {
 
 		function gen362() {
 			if (obj.publicationType === 'issn') {
-				marcRecord.insertField({
+				return marcRecord.insertField({
 					tag: '362',
 					ind1: '0',
 					ind2: '_',
@@ -997,7 +969,7 @@ export default function (stream) {
 			}
 
 			if ((obj.formatDetails.format === 'electronic' || obj.formatDetails.format === 'printed') && obj.type === 'dissertation') {
-				marcRecord.insertField({
+				return marcRecord.insertField({
 					tag: '502',
 					subfields: [
 						{
@@ -1032,8 +1004,8 @@ export default function (stream) {
 				]
 			});
 
-			if (!(obj.publicationType === 'issn')) {
-				marcRecord.insertField({
+			if (obj.publicationType === 'isbn-ismn') {
+				return marcRecord.insertField({
 					tag: '594',
 					subfields: [
 						{
@@ -1052,7 +1024,7 @@ export default function (stream) {
 		function gen700() {
 			if (obj.publicationType === 'isbn-ismn' && (obj.authors.some(item => item.role === 'editor' || item.role === 'illustrator' || item.role === 'translator'))) {
 				if (obj.publicationType === 'isbn-ismn' && (obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic' || obj.formatDetails.format === 'audio')) {
-					marcRecord.insertField({
+					return marcRecord.insertField({
 						tag: '700',
 						ind1: '1',
 						ind2: '_',
@@ -1077,7 +1049,7 @@ export default function (stream) {
 
 		function gen710() {
 			if (obj.publicationType === 'issn') {
-				marcRecord.insertField({
+				return marcRecord.insertField({
 					tag: '710',
 					ind1: '2',
 					ind2: '_',
@@ -1093,7 +1065,7 @@ export default function (stream) {
 
 		function gen760() {
 			if (obj.publicationType === 'issn') {
-				marcRecord.insertField({
+				return marcRecord.insertField({
 					tag: '760',
 					ind1: '0',
 					ind2: '0',
@@ -1154,18 +1126,16 @@ export default function (stream) {
 					}
 				];
 				if (obj.publicationType === 'issn') {
-					subfields.push({code: 't', value: '{title from another form'}, {code: 'x', value: '{ISSN from another form}'}); // Another Form not clear
-					return subfields;
+					return subfields.concat({code: 't', value: '{title from another form'}, {code: 'x', value: '{ISSN from another form}'}); // Another Form not clear
 				}
 
-				subfields.push({code: 'z', value: '{ISBN from another form}'});
-				return subfields;
+				return subfields.concat({code: 'z', value: '{ISBN from another form}'});
 			}
 		}
 
 		function gen780() {
 			if (obj.publicationType === 'issn') {
-				marcRecord.insertField({
+				return marcRecord.insertField({
 					tag: '780',
 					ind1: '0',
 					ind2: '0',
@@ -1193,7 +1163,7 @@ export default function (stream) {
 
 		function gen935() {
 			if (obj.publicationType === 'issn') {
-				marcRecord.insertField({
+				return marcRecord.insertField({
 					tag: '935',
 					subfields: [
 						{
