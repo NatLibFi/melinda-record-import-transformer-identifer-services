@@ -177,39 +177,60 @@ export default function (stream) {
 			marcRecord.insertField({
 				tag: '007', value: chars.join('')
 			});
-			// ************************ $33 fiction/non-fiction/cartoon not implemented yet **************************************
+
 			function makeRules() {
-				if (obj.formatDetails.format === 'electronic' && (obj.type === 'book' || obj.type === 'dissertation' || obj.type === 'serial')) {
-					const initialChars = [
-						{index: 0, value: 'c'},
-						{index: 1, value: 'r'}
-					];
-					if (Object.keys(obj.seriesDetails).length > 0) {
+				if (obj.publicationType === 'isbn-ismn') {
+					if (obj.formatDetails.format === 'electronic' && (obj.type === 'book' || obj.type === 'dissertation')) {
+						const initialChars = [
+							{index: 0, value: 'c'},
+							{index: 1, value: 'r'}
+						];
+
+						const finalChars = new Array(21).fill(' ').map((_, index) => ({index: index + initialChars.length, value: ' '}));
+						return initialChars.concat(finalChars);
+					}
+
+					if (obj.formatDetails.format === 'audio' && obj.type === 'book') {
+						const initialChars = [
+							{index: 0, value: 's'},
+							{index: 1, value: 'd'}
+						];
+
+						const finalChars = new Array(21).fill(' ').map((_, index) => ({index: index + initialChars.length, value: '|'}));
+						return initialChars.concat(finalChars);
+					}
+				}
+
+				if (obj.publicationType === 'issn') {
+					if (obj.formatDetails.format === 'printed' && (obj.type === 'serial')) {
+						const initialChars = [
+							{index: 0, value: 't'},
+							{index: 1, value: 'a'}
+						];
+
+						const finalChars = new Array(21).fill(' ').map((_, index) => ({index: index + initialChars.length, value: ' '}));
+						return initialChars.concat(finalChars);
+					}
+
+					if (obj.formatDetails.format === 'electronic' && (obj.type === 'serial')) {
+						const initialChars = [
+							{index: 0, value: 'c'},
+							{index: 1, value: 'r'}
+						];
+
 						const finalChars = new Array(21).fill(' ').map((_, index) => ({index: index + initialChars.length, value: '|'}));
 						return initialChars.concat(finalChars);
 					}
 
-					const finalChars = new Array(21).fill(' ').map((_, index) => ({index: index + initialChars.length, value: ' '}));
-					return initialChars.concat(finalChars);
-				}
+					if (obj.formatDetails.format === 'audio' && (obj.type === 'serial')) {
+						const initialChars = [
+							{index: 0, value: 's'},
+							{index: 1, value: 'd'}
+						];
 
-				if (obj.formatDetails.format === 'audio' && (obj.type === 'book' || obj.type === 'serial')) {
-					const initialChars = [
-						{index: 0, value: 's'},
-						{index: 1, value: 'd'}
-					];
-
-					const finalChars = new Array(21).fill(' ').map((_, index) => ({index: index + initialChars.length, value: '|'}));
-					return initialChars.concat(finalChars);
-				}
-
-				if (obj.formatDetails.format === 'printed' && obj.type === 'serial') {
-					const initialChars = [
-						{index: 0, value: 't'},
-						{index: 1, value: 'a'}
-					];
-					const finalChars = new Array(21).fill(' ').map((_, index) => ({index: index + initialChars.length, value: ' '}));
-					return initialChars.concat(finalChars);
+						const finalChars = new Array(21).fill(' ').map((_, index) => ({index: index + initialChars.length, value: ' '}));
+						return initialChars.concat(finalChars);
+					}
 				}
 			}
 		}
@@ -350,6 +371,22 @@ export default function (stream) {
 
 					]
 				});
+
+				if (obj.seriesDetails && obj.seriesDetails.volume > 1) {
+					marcRecord.insertField({
+						tag: '020',
+						subfields: [
+							{
+								code: 'a',
+								value: 'something' // Not clear specification
+							},
+							{
+								code: 'q',
+								value: 'to do later' // Not clear specification
+							}
+						]
+					});
+				}
 			}
 			// ****************** 	$a another ISBN, if the book is a part of a multi-volume publication is left to implement ********************************
 		}
