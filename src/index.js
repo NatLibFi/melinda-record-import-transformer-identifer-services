@@ -33,6 +33,6 @@ const {startTransformer} = Transformer;
 
 run();
 
-async function run() {
-	startTransformer(transform);
+function run() {
+  startTransformer(transform);
 }
