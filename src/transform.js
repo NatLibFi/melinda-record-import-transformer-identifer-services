@@ -1,4 +1,3 @@
-/* eslint-disable max-lines */
 /**
 *
 * @licstart  The following is the entire license notice for the JavaScript code in this file.
@@ -56,8 +55,7 @@ export default function (stream) {
       ]).on('error', err => Emitter.emit('error', err));
 
       pipeline.on('data', data => {
-        // eslint-disable-next-line functional/immutable-data
-        promises.push(transform(data.value));
+        promises.push(transform(data.value));  // eslint-disable-line
 
         function transform(value) {
           try {
@@ -82,7 +80,6 @@ export default function (stream) {
     }
   }
 
-  // eslint-disable-next-line max-statements
   function convertRecord(obj) {
     const marcRecord = new MarcRecord();
     genLeader();
@@ -234,8 +231,7 @@ export default function (stream) {
             return initialChars.concat(finalChars);
           }
 
-          // eslint-disable-next-line no-extra-parens
-          if (obj.formatDetails.format === 'electronic' && (obj.type === 'serial')) {
+          if (obj.formatDetails.format === 'electronic' && obj.type === 'serial') {
             const initialChars = [
               {index: 0, value: 'c'},
               {index: 1, value: 'r'}
