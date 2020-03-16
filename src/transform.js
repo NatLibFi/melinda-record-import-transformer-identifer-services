@@ -55,7 +55,7 @@ export default function (stream) {
       ]).on('error', err => Emitter.emit('error', err));
 
       pipeline.on('data', data => {
-        promises.push(transform(data.value));  // eslint-disable-line
+        promises.push(transform(data.value)); // eslint-disable-line functional/immutable-data
 
         function transform(value) {
           try {
