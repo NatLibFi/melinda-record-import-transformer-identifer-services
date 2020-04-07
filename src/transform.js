@@ -80,7 +80,6 @@ export default function (stream) {
     }
   }
 
-
   function convertRecord(obj) { // eslint-disable-line max-statements
     const marcRecord = new MarcRecord();
     genLeader();
