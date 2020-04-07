@@ -80,7 +80,7 @@ export default function (stream) {
     }
   }
 
-  function convertRecord(obj) { // eslint-disable-line max-statements
+  function convertRecord(obj) {
     const marcRecord = new MarcRecord();
     genLeader();
     gen007();
@@ -192,7 +192,7 @@ export default function (stream) {
         tag: '007', value: chars.join('')
       });
 
-      function makeRules() { // eslint-disable-line max-statements
+      function makeRules() {
         if (obj.publicationType === 'isbn-ismn') {
           if (obj.formatDetails.format === 'electronic' && (obj.type === 'book' || obj.type === 'dissertation')) {
             const initialChars = [
@@ -272,7 +272,7 @@ export default function (stream) {
 
       // ************************ $33 fiction/non-fiction/cartoon not implemented yet **************************************
 
-      function makeRules() { // eslint-disable-line max-statements
+      function makeRules() {
         // Works in a condition when there is no publication time in Issn. Need to check this later
         const baseChars = obj.publicationTime
           ? [
@@ -786,7 +786,7 @@ export default function (stream) {
       });
 
 
-      function aValue(val) { // eslint-disable-line max-statements
+      function aValue(val) {
         if (obj.publicationType === 'isbn-ismn' || obj.publicationType === 'issn') {
           if ((obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic') && (obj.type === 'dissertation' || obj.type === 'book')) {
             if (val === 'a') {
@@ -831,7 +831,7 @@ export default function (stream) {
       });
 
 
-      function aValue() { // eslint-disable-line max-statements
+      function aValue() {
         if (obj.publicationType === 'isbn-ismn') {
           if (obj.formatDetails.format === 'printed' && (obj.type === 'dissertation' || obj.type === 'book')) {
             return 'käytettävissä ilman laitetta';
@@ -861,7 +861,7 @@ export default function (stream) {
       }
 
 
-      function bValue() { // eslint-disable-line max-statements
+      function bValue() {
         if (obj.publicationType === 'isbn-ismn') {
           if (obj.formatDetails.format === 'printed' && (obj.type === 'dissertation' || obj.type === 'book')) {
             return 'n';
@@ -912,7 +912,7 @@ export default function (stream) {
       });
 
 
-      function aValue() { // eslint-disable-line max-statements
+      function aValue() {
         if (obj.publicationType === 'isbn-ismn') {
           if (obj.formatDetails.format === 'printed' && (obj.type === 'dissertation' || obj.type === 'book')) {
             return 'nide';
@@ -949,7 +949,7 @@ export default function (stream) {
         }
       }
 
-      function bValue() { // eslint-disable-line max-statements
+      function bValue() {
         if (obj.publicationType === 'isbn-ismn') {
           if (obj.formatDetails.format === 'printed' && (obj.type === 'dissertation' || obj.type === 'book')) {
             return 'nc';
