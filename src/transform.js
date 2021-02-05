@@ -1192,7 +1192,7 @@ export default function (stream) {
     }
 
     function gen780() {
-      if (obj.publicationType === 'issn') {
+      if (obj.publicationType === 'issn' && obj.previousPublication) {
         return marcRecord.insertField({
           tag: '780',
           ind1: '0',
