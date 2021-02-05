@@ -1123,7 +1123,7 @@ export default function (stream) {
     }
 
     function gen760() {
-      if (obj.publicationType === 'issn') {
+      if (obj.publicationType === 'issn' && obj.seriesDetails && obj.seriesDetails.mainSeries) {
         return marcRecord.insertField({
           tag: '760',
           ind1: '0',
@@ -1134,23 +1134,21 @@ export default function (stream) {
 
       function valueSubfields() {
         if (obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic' || obj.formatDetails.format === 'serial') {
-          if (obj.seriesDetails && obj.seriesDetails.mainSeries) {
-            const subfields = [
-              {
-                code: 't',
-                value: `${obj.seriesDetails.mainSeries.title}`
-              },
-              {
-                code: 'x',
-                value: `${obj.seriesDetails.mainSeries.identifier}`
-              },
-              {
-                code: '9',
-                value: 'FENNI<KEEP>'
-              }
-            ];
-            return subfields;
-          }
+          const subfields = [
+            {
+              code: 't',
+              value: `${obj.seriesDetails.mainSeries.title}`
+            },
+            {
+              code: 'x',
+              value: `${obj.seriesDetails.mainSeries.identifier}`
+            },
+            {
+              code: '9',
+              value: 'FENNI<KEEP>'
+            }
+          ];
+          return subfields;
         }
       }
     }
