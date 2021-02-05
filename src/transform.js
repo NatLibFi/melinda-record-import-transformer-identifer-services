@@ -1133,23 +1133,24 @@ export default function (stream) {
       }
 
       function valueSubfields() {
-        const subfields = [
-          {
-            code: 't',
-            value: `${obj.seriesDetails.mainSeries.title}`
-          },
-          {
-            code: 'x',
-            value: `${obj.seriesDetails.mainSeries.identifier}`
-          },
-          {
-            code: '9',
-            value: 'FENNI<KEEP>'
-          }
-        ];
-
         if (obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic' || obj.formatDetails.format === 'serial') {
-          return subfields;
+          if (obj.seriesDetails && obj.seriesDetails.mainSeries) {
+            const subfields = [
+              {
+                code: 't',
+                value: `${obj.seriesDetails.mainSeries.title}`
+              },
+              {
+                code: 'x',
+                value: `${obj.seriesDetails.mainSeries.identifier}`
+              },
+              {
+                code: '9',
+                value: 'FENNI<KEEP>'
+              }
+            ];
+            return subfields;
+          }
         }
       }
     }
