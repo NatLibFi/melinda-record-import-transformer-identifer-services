@@ -153,13 +153,13 @@ export default function (stream) {
               return ' ';
             }
             if (obj.formatDetails.format === 'printed' && obj.type === 'dissertation') {
-              return '^';
+              return ' '; // Replaced with blank space instead of ^
             }
           }
 
           if (obj.publicationType === 'issn') {
             if ((obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'audio') && obj.type === 'serial') {
-              return '^';
+              return ' '; // Replaced with blank space instead of ^
             }
           }
         }
@@ -334,7 +334,7 @@ export default function (stream) {
 
           if (obj.formatDetails.format === 'electronic') {
             return baseChars.concat(dissertationChars, [
-              {index: 22, value: '^'},
+              {index: 22, value: ' '},
               {index: 23, value: 'o'}
             ]);
           }
@@ -939,7 +939,7 @@ export default function (stream) {
             return 'nide';
           }
 
-          if (obj.formatDetails.format === 'electronic') {
+          if (obj.formatDetails.format === 'online') {
             return 'verkkoaineisto';
           }
 
@@ -969,7 +969,7 @@ export default function (stream) {
             return 'nc';
           }
 
-          if (obj.formatDetails.format === 'electronic') {
+          if (obj.formatDetails.format === 'online') {
             return 'cr';
           }
 
