@@ -374,9 +374,7 @@ export default function (stream) {
             ].concat(gen1517(), gen1821());
 
             if (isElectronic(obj)) {
-              return baseChars.concat(musicChars, [
-                {index: 23, value: 'o'}
-              ]);
+              return baseChars.concat(musicChars, [{index: 23, value: 'o'}]);
             }
 
             if (isPrinted(obj)) {
