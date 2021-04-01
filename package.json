@@ -33,12 +33,15 @@
 		"watch": "cross-env DEBUG=1 NODE_ENV=debug nodemon --watch src --exec 'npm run test:dev'"
 	},
 	"dependencies": {
+		"@babel/runtime": "^7.13.10",
 		"@natlibfi/identifier-services-commons": "git+https://github.com/natlibfi/identifier-services-commons.git#feature/apiError",
 		"@natlibfi/marc-record": "^4.0.0",
+		"@natlibfi/marc-record-serializers": "^7.2.3",
 		"@natlibfi/marc-record-validate": "^5.0.0",
 		"@natlibfi/marc-record-validators-melinda": "^8.0.0",
 		"@natlibfi/melinda-commons": "^7.0.0",
 		"@natlibfi/melinda-record-import-commons": "^7.0.3",
+		"@natlibfi/sru-client": "^4.0.2",
 		"moment": "^2.22.2",
 		"stream-chain": "^2.2.1",
 		"stream-json": "1.3.1"

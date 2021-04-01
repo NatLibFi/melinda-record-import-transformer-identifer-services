@@ -1,3 +1,5 @@
+/* eslint-disable max-lines */
+/* eslint-disable max-statements */
 /**
 *
 * @licstart  The following is the entire license notice for the JavaScript code in this file.
@@ -32,6 +34,9 @@ import {EventEmitter} from 'events';
 import {parser} from 'stream-json';
 import {chain} from 'stream-chain';
 import {streamArray} from 'stream-json/streamers/StreamArray';
+import createSruClient from '@natlibfi/sru-client';
+import {MARCXML} from '@natlibfi/marc-record-serializers';
+import {SRU_URL} from './config';
 
 class TransformEmitter extends EventEmitter {}
 const {createLogger} = Utils;
@@ -40,6 +45,7 @@ export default function (stream) {
   MarcRecord.setValidationOptions({subfieldValues: false});
   const Emitter = new TransformEmitter();
   const logger = createLogger();
+  const sruClient = createSruClient({url: SRU_URL, recordSchema: 'marcxml', retrieveAll: false});
   logger.log('debug', 'Starting to send recordEvents');
 
   readStream(stream);
@@ -80,13 +86,24 @@ export default function (stream) {
     }
   }
 
-  function convertRecord(obj) {
+  async function convertRecord(obj) {
     const marcRecord = new MarcRecord();
+
+    if (obj.metadataReference && obj.metadataReference.state === 'processed' && obj.metadataReference.update === true) { // eslint-disable-line
+      const record = await getRecord(obj.metadataReference.id);
+      marcRecord.insertField(record.get(/^001$/u));
+      marcRecord.insertField(record.get(/^003$/u));
+      marcRecord.insertField(record.get(/^035$/u));
+      marcRecord.insertField(record.get(/^CAT$/u));
+
+    }
+
     genLeader();
     gen007();
     gen008();
     gen020();
     gen022();
+    gen024();
     gen040();
     gen041();
     gen042();
@@ -113,7 +130,34 @@ export default function (stream) {
     gen776();
     gen780();
     gen935();
+
     return {failed: false, record: marcRecord};
+
+    function getRecord(id) {
+      return new Promise((resolve, reject) => {
+        let promise; // eslint-disable-line functional/no-let
+        sruClient.searchRetrieve(`rec.id=${id}`)
+          .on('record', xmlString => {
+            promise = MARCXML.from(xmlString, {subfieldValues: false});
+          })
+          .on('end', async () => {
+            if (promise) {
+              try {
+                const record = await promise;
+                resolve(record);
+              } catch (err) {
+                reject(err);
+              }
+
+              return;
+            }
+
+            resolve();
+          })
+          .on('error', err => reject(err));
+      });
+
+    }
 
     function genLeader() {
       const rules = makeRules();
@@ -141,7 +185,7 @@ export default function (stream) {
           {index: 18, value: 'i'}
         ];
 
-        if (obj.formatDetails.format === 'printed') {
+        if (isPrinted(obj)) {
           return baseChars.concat({index: '08', value: value08()});
         }
 
@@ -149,16 +193,16 @@ export default function (stream) {
 
         function value08() {
           if (obj.publicationType === 'isbn-ismn') {
-            if (obj.formatDetails.format === 'printed' && obj.type === 'book') {
+            if (isPrinted(obj) && obj.type !== 'music' && obj.type !== 'dissertation') {
               return ' ';
             }
-            if (obj.formatDetails.format === 'printed' && obj.type === 'dissertation') {
+            if (isPrinted(obj) && obj.type === 'dissertation') {
               return ' '; // Replaced with blank space instead of ^
             }
           }
 
           if (obj.publicationType === 'issn') {
-            if ((obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'audio') && obj.type === 'serial') {
+            if ((isPrinted(obj) || isAudio(obj)) && obj.type === 'serial') {
               return ' '; // Replaced with blank space instead of ^
             }
           }
@@ -187,38 +231,35 @@ export default function (stream) {
 
           return _;
         });
-
-      marcRecord.insertField({
-        tag: '007', value: chars.join('')
-      });
+      if ((obj.publicationType === 'isbn-ismn' && isElectronic(obj)) || obj.publicationType === 'issn') { // eslint-disable-line
+        return marcRecord.insertField({
+          tag: '007', value: chars.join('')
+        });
+      }
 
       function makeRules() {
         if (obj.publicationType === 'isbn-ismn') {
-          if (obj.formatDetails.format === 'electronic' && (obj.type === 'book' || obj.type === 'dissertation')) {
-            const initialChars = [
-              {index: 0, value: 'c'},
-              {index: 1, value: 'r'}
-            ];
-
-            const finalChars = new Array(21).fill(' ')
-              .map((_, index) => ({index: index + initialChars.length, value: ' '}));
-            return initialChars.concat(finalChars);
-          }
-
-          if (obj.formatDetails.format === 'audio' && obj.type === 'book') {
+          if (isAudio(obj) && obj.type !== 'dissertation') {
             const initialChars = [
               {index: 0, value: 's'},
               {index: 1, value: 'd'}
             ];
-
             const finalChars = new Array(21).fill(' ')
               .map((_, index) => ({index: index + initialChars.length, value: '|'}));
             return initialChars.concat(finalChars);
           }
+          const initialChars = [
+            {index: 0, value: 'c'},
+            {index: 1, value: 'r'}
+          ];
+
+          const finalChars = new Array(21).fill(' ')
+            .map((_, index) => ({index: index + initialChars.length, value: ' '}));
+          return initialChars.concat(finalChars);
         }
 
         if (obj.publicationType === 'issn') {
-          if (obj.formatDetails.format === 'printed' && obj.type === 'serial') {
+          if (isPrinted(obj)) {
             const initialChars = [
               {index: 0, value: 't'},
               {index: 1, value: 'a'}
@@ -229,7 +270,7 @@ export default function (stream) {
             return initialChars.concat(finalChars);
           }
 
-          if (obj.formatDetails.format === 'electronic' && obj.type === 'serial') {
+          if (isElectronic(obj)) {
             const initialChars = [
               {index: 0, value: 'c'},
               {index: 1, value: 'r'}
@@ -240,7 +281,7 @@ export default function (stream) {
             return initialChars.concat(finalChars);
           }
 
-          if (obj.formatDetails.format === 'audio' && obj.type === 'serial') {
+          if (isAudio(obj)) {
             const initialChars = [
               {index: 0, value: 's'},
               {index: 1, value: 'd'}
@@ -295,52 +336,74 @@ export default function (stream) {
             {index: 34, value: '0'}
           ].concat(gen1114(), gen1517(), gen3032());
 
-          if (obj.formatDetails.format === 'electronic') {
+          if (isElectronic(obj)) {
             return baseChars.concat(seriesChars, [{index: 23, value: 'o'}]);
           }
 
-          if (obj.formatDetails.format === 'printed') {
+          if (isPrinted(obj)) {
             return baseChars.concat(seriesChars);
           }
         }
 
-        if (obj.type === 'book') {
-          const bookChars = [
-            {index: 29, value: '|'},
-            {index: 30, value: '0'},
-            {index: 31, value: '|'},
-            {index: 33, value: '0'},
-            {index: 34, value: '|'}
-          ].concat(gen1517());
+        if (obj.publicationType === 'isbn-ismn') {
+          if (obj.type !== 'music' && obj.type !== 'dissertation') {
+            const bookChars = [
+              {index: 29, value: '|'},
+              {index: 30, value: '0'},
+              {index: 31, value: '|'},
+              {index: 33, value: gen33(obj)},
+              {index: 34, value: '|'}
+            ].concat(gen1517());
 
-          if (obj.formatDetails.format === 'electronic') {
-            return baseChars.concat(bookChars, [{index: 23, value: 'o'}]);
+            if (isElectronic(obj)) {
+              return baseChars.concat(bookChars, [{index: 23, value: 'o'}]);
+            }
+
+            if (isPrinted(obj)) {
+              return baseChars.concat(bookChars);
+            }
           }
 
-          if (obj.formatDetails.format === 'printed') {
-            return baseChars.concat(bookChars);
-          }
-        }
+          if (obj.type === 'music') {
+            const musicChars = [
+              {index: 29, value: '|'},
+              {index: 30, value: '0'},
+              {index: 31, value: '|'},
+              {index: 33, value: '0'},
+              {index: 34, value: '|'}
+            ].concat(gen1517(), gen1821());
 
-        if (obj.type === 'dissertation') {
-          const dissertationChars = [
-            {index: 24, value: 'm'},
-            {index: 29, value: '|'},
-            {index: 30, value: '0'},
-            {index: 31, value: '|'},
-            {index: 33, value: '0'},
-            {index: 34, value: '|'}
-          ].concat(gen1517(), gen1821());
+            if (isElectronic(obj)) {
+              return baseChars.concat(musicChars, [
+                {index: 23, value: 'o'}
+              ]);
+            }
 
-          if (obj.formatDetails.format === 'electronic') {
-            return baseChars.concat(dissertationChars, [
-              {index: 22, value: ' '},
-              {index: 23, value: 'o'}
-            ]);
+            if (isPrinted(obj)) {
+              return baseChars.concat(musicChars);
+            }
           }
 
-          if (obj.formatDetails.format === 'printed') {
-            return baseChars.concat(dissertationChars);
+          if (obj.type === 'dissertation') {
+            const dissertationChars = [
+              {index: 24, value: 'm'},
+              {index: 29, value: '|'},
+              {index: 30, value: '0'},
+              {index: 31, value: '|'},
+              {index: 33, value: '0'},
+              {index: 34, value: '|'}
+            ].concat(gen1517(), gen1821());
+
+            if (isElectronic(obj)) {
+              return baseChars.concat(dissertationChars, [
+                {index: 22, value: ' '},
+                {index: 23, value: 'o'}
+              ]);
+            }
+
+            if (isPrinted(obj)) {
+              return baseChars.concat(dissertationChars);
+            }
           }
         }
 
@@ -376,6 +439,29 @@ export default function (stream) {
           return generate('|||', 30);
         }
 
+        function gen33(object) {
+          if ('1' in object.isbnClassification && '2' in object.isbnClassification) {
+            if ('3' in object.isbnClassification) {
+              return '1';
+            }
+            return 'm';
+          }
+
+          if ('1' in object.isbnClassification) {
+            if ('3' in object.isbnClassification) {
+              return '1';
+            }
+            return '0';
+          }
+
+          if ('2' in object.isbnClassification) {
+            if ('3' in object.isbnClassification) {
+              return '1';
+            }
+            return 'f';
+          }
+        }
+
         function gen3537() {
           return generate(obj.language, 35);
         }
@@ -387,44 +473,42 @@ export default function (stream) {
     }
 
     function gen020() {
-      if (obj.publicationType === 'isbn-ismn') {
-        marcRecord.insertField({
-          tag: '020',
-          subfields: [
-            {
-              code: 'a',
-              value: 'to do later' // Not clear specification
-            },
-            {
-              code: 'q',
-              value: 'to do later' // Not clear specification
-            }
-
-          ]
-        });
-
-        if (obj.seriesDetails && obj.seriesDetails.volume > 1) {
+      if (obj.publicationType === 'isbn-ismn' && obj.type !== 'music') {
+        if (obj.seriesDetails) {
           return marcRecord.insertField({
             tag: '020',
             subfields: [
               {
                 code: 'a',
-                value: 'something' // Not clear specification
+                value: obj.seriesDetails.identifier
               },
               {
                 code: 'q',
-                value: 'to do later' // Not clear specification
+                value: 'kokonaisuus'
               }
             ]
           });
         }
+        marcRecord.insertField({
+          tag: '020',
+          subfields: [
+            {
+              code: 'a',
+              value: 'to do later' // ISBN number
+            },
+            {
+              code: 'q',
+              value: 'to do later' // Printformat
+            }
+
+          ]
+        });
       }
-      // ****************** $a another ISBN, if the book is a part of a multi-volume publication is left to implement ********************************
     }
 
     function gen022() {
       if (obj.publicationType === 'issn') {
-        if ((obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic' || obj.formatDetails.format === 'audio') && obj.type === 'serial') {
+        if (isPrinted(obj) || isElectronic(obj) || isAudio(obj)) {
           return marcRecord.insertField({
             tag: '022',
             ind1: '0',
@@ -444,8 +528,47 @@ export default function (stream) {
       }
     }
 
+    function gen024() {
+      if (obj.publicationType === 'isbn-ismn' && obj.type === 'music') {
+        marcRecord.insertField({
+          tag: '024',
+          ind1: '2',
+          ind2: '_',
+          subfields: [
+            {
+              code: 'a',
+              value: obj.identifier // Need to fix(obj.identifier according to data)
+            },
+            {
+              code: 'q',
+              value: obj.formatDetails.printFormat
+            }
+          ]
+        });
+
+        /* If (part of multi volume ) {
+            return marcRecord.insertField({
+              tag: '024',
+              ind1: '2',
+              ind2: '_',
+              subfields: [
+                {
+                  code: 'a',
+                  value: obj.identifier // Need to fix(obj.identifier according to data)
+                },
+                {
+                  code: 'q',
+                  value: obj.formatDetails.printFormat
+                }
+              ]
+            });
+        } */
+        return;
+      }
+    }
+
     function gen040() {
-      if ((obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic' || obj.formatDetails.format === 'audio') && (obj.type === 'book' || obj.type === 'dissertation' || obj.type === 'serial')) {
+      if (isPrinted(obj) || isElectronic(obj) || isElectronic(obj) || isAudio(obj)) {
         return marcRecord.insertField({
           tag: '040',
           subfields: [
@@ -467,7 +590,7 @@ export default function (stream) {
     }
 
     function gen041() {
-      if ((obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic' || obj.formatDetails.format === 'audio') && (obj.type === 'book' || obj.type === 'dissertation' || obj.type === 'serial')) {
+      if (isPrinted(obj) || isElectronic(obj) || isAudio(obj)) {
         return marcRecord.insertField({
           tag: '041',
           ind1: '0',
@@ -482,7 +605,7 @@ export default function (stream) {
       }
 
       function selectCode() {
-        if (obj.formatDetails.format === 'audio' && (obj.type === 'book' || obj.type === 'serial')) {
+        if (isAudio(obj) && (obj.type !== 'music' && obj.type !== 'dissertation')) {
           return 'd';
         }
 
@@ -491,7 +614,7 @@ export default function (stream) {
     }
 
     function gen042() {
-      if ((obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic' || obj.formatDetails.format === 'audio') && (obj.type === 'book' || obj.type === 'dissertation' || obj.type === 'serial')) {
+      if (isPrinted(obj) || isElectronic(obj) || isAudio(obj)) {
         return marcRecord.insertField({
           tag: '042',
           subfields: [
@@ -505,47 +628,19 @@ export default function (stream) {
     }
 
     function gen080() {
-      if (obj.type === 'dissertation' || obj.publicationType === 'issn') {
+      if (obj.type === 'dissertation' || obj.publicationType === 'issn' || obj.type === 'music') {
         return;
       }
 
-      marcRecord.insertField({
-        tag: '080',
-        ind1: '1',
-        ind2: '_',
-        subfields: [
-          {
-            code: 'a',
-            value: '894.541'
-          },
-          {
-            code: 'x',
-            value: '-3'
-          },
-          {
-            code: '2',
-            value: '1974/fin/fennica'
-          },
-          {
-            code: '9',
-            value: 'FENNI<KEEP>'
-          }
-        ]
-      });
-
-      // ********************* If cartoon is not implemented yet *************************
-    }
-
-    function gen084() {
-      if (obj.publicationType === 'isbn-ismn' && (obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic')) {
+      if ('3' in obj.isbnClassification) { // 3 denotes the stored value for cartoon
         return marcRecord.insertField({
-          tag: '084',
-          ind1: '_',
+          tag: '080',
+          ind1: '1',
           ind2: '_',
           subfields: [
             {
               code: 'a',
-              value: '84.2'
+              value: '741.5'
             },
             {
               code: '2',
@@ -559,12 +654,114 @@ export default function (stream) {
         });
       }
 
-      // *********************** If Finnish cartoon is not implemented yet ***************************
+      if ('2' in obj.isbnClassification && '3' in obj.isbnClassification && obj.language === 'fin') {
+        return marcRecord.insertField({
+          tag: '080',
+          ind1: '1',
+          ind2: '_',
+          subfields: [
+            {
+              code: 'a',
+              value: '894.541'
+            },
+            {
+              code: 'x',
+              value: '-3'
+            },
+            {
+              code: 'x',
+              value: '(024.7)'
+            },
+            {
+              code: '2',
+              value: '1974/fin/fennica'
+            },
+            {
+              code: '9',
+              value: 'FENNI<KEEP>'
+            }
+          ]
+        });
+      }
+
+      if ('2' in obj.isbnClassification) {
+        return marcRecord.insertField({
+          tag: '080',
+          ind1: '1',
+          ind2: '_',
+          subfields: [
+            {
+              code: 'a',
+              value: '894.541'
+            },
+            {
+              code: 'x',
+              value: '-3'
+            },
+            {
+              code: '2',
+              value: '1974/fin/fennica'
+            },
+            {
+              code: '9',
+              value: 'FENNI<KEEP>'
+            }
+          ]
+        });
+      }
+    }
+
+    function gen084() {
+      if (obj.publicationType === 'isbn-ismn' && obj.type !== 'music') {
+        if ('2' in obj.isbnClassification && !('3' in obj.isbnClassification)) { // '2' = fiction && '3' = cartoon
+          return marcRecord.insertField({
+            tag: '084',
+            ind1: '_',
+            ind2: '_',
+            subfields: [
+              {
+                code: 'a',
+                value: '84.2'
+              },
+              {
+                code: '2',
+                value: '1974/fin/fennica'
+              },
+              {
+                code: '9',
+                value: 'FENNI<KEEP>'
+              }
+            ]
+          });
+        }
+
+        if ('3' in obj.isbnClassification) { // '3' is referring to cartoon
+          return marcRecord.insertField({
+            tag: '084',
+            ind1: '_',
+            ind2: '_',
+            subfields: [
+              {
+                code: 'a',
+                value: '85.32'
+              },
+              {
+                code: '2',
+                value: '1974/fin/fennica'
+              },
+              {
+                code: '9',
+                value: 'FENNI<KEEP>'
+              }
+            ]
+          });
+        }
+      }
     }
 
     function gen100() {
-      if (obj.publicationType === 'isbn-ismn' && obj.authors.some(item => item.role === 'author')) {
-        if ((obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic' || obj.formatDetails.format === 'audio') && (obj.type === 'dissertation' || obj.type === 'book')) {
+      if (obj.publicationType === 'isbn-ismn' && (obj.authors.some(item => item.role === 'author') || obj.type === 'dissertation')) {
+        if (isPrinted(obj) || isElectronic(obj) || isAudio(obj)) {
           const author = obj.authors.filter(item => item.role === 'author');
           return marcRecord.insertField({
             tag: '100',
@@ -573,7 +770,7 @@ export default function (stream) {
             subfields: [
               {
                 code: 'a',
-                value: `${author[0].givenName} ${author[0].familyName}`
+                value: `${author[0].givenName}, ${author[0].familyName}`
               },
               {
                 code: 'e',
@@ -591,7 +788,24 @@ export default function (stream) {
 
     function gen222() {
       if (obj.publicationType === 'issn') {
-        if ((obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic' || obj.formatDetails.format === 'audio') && obj.type === 'serial') {
+        if (isPrinted(obj) || isElectronic(obj) || isAudio(obj)) {
+          if (obj.formatDetails.multiFormat) {
+            return marcRecord.insertField({
+              tag: '222',
+              ind1: '_',
+              ind2: '0',
+              subfields: [
+                {
+                  code: 'a',
+                  value: `${obj.title}${obj.subtitle ? ' :' : '.'}`
+                },
+                {
+                  code: 'b',
+                  value: valueSubFieldb()
+                }
+              ]
+            });
+          }
           return marcRecord.insertField({
             tag: '222',
             ind1: '_',
@@ -599,11 +813,7 @@ export default function (stream) {
             subfields: [
               {
                 code: 'a',
-                value: ''
-              },
-              {
-                code: 'b',
-                value: valueSubFieldb() // If there is another publication form (printed)
+                value: `${obj.title}${obj.subtitle ? ' :' : '.'}`
               }
             ]
           });
@@ -611,12 +821,11 @@ export default function (stream) {
       }
 
       function valueSubFieldb() {
-        // Check if there is another publication not implemented yet
-        if (obj.formatDetails.format === 'printed') {
+        if (isPrinted(obj)) {
           return 'Painettu';
         }
 
-        if (obj.formatDetails.format === 'electronic') {
+        if (isElectronic(obj)) {
           return 'Verkkoaineisto';
         }
       }
@@ -624,8 +833,8 @@ export default function (stream) {
 
     function gen245() {
       if (obj.publicationType === 'isbn-ismn' || obj.publicationType === 'issn') {
-        if ((obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic' || obj.formatDetails.format === 'audio') && (obj.type === 'book' || obj.type === 'dissertation' || obj.type === 'serial')) {
-          return marcRecord.insertField({
+        if (isPrinted(obj) || isElectronic(obj) || isAudio(obj)) {
+          marcRecord.insertField({
             tag: '245',
             ind1: ind1(),
             ind2: '0',
@@ -633,7 +842,12 @@ export default function (stream) {
               {
                 code: 'a',
                 value: `${obj.title}${obj.subtitle ? ' :' : '.'}`
-              },
+              }
+            ]
+          });
+          return marcRecord.insertField({
+            tag: '245',
+            subfields: [
               {
                 code: 'b',
                 value: `${obj.subtitle}.`
@@ -654,13 +868,13 @@ export default function (stream) {
 
     function gen250() {
       if (obj.publicationType === 'isbn-ismn') {
-        if ((obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic') && obj.type === 'book') {
+        if ((isPrinted(obj) || isElectronic(obj) || isAudio(obj)) && obj.type !== 'dissertation' && obj.formatDetails.edition) {
           return marcRecord.insertField({
             tag: '250',
             subfields: [
               {
                 code: 'a',
-                value: '.' // To be added later
+                value: `${obj.formatDetails.edition}.`
               }
             ]
           });
@@ -670,13 +884,13 @@ export default function (stream) {
 
     function gen255() {
       if (obj.publicationType === 'isbn-ismn') {
-        if ((obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic') && obj.type === 'book') {
+        if ((isPrinted(obj) || isElectronic(obj)) && obj.type === 'map' && obj.mapDetails && obj.mapDetails.scale) {
           return marcRecord.insertField({
             tag: '255',
             subfields: [
               {
                 code: 'a',
-                value: 'NOT CLEAR IN SPECIFICATION' // Scale, for example a map on a scale of 15:000
+                value: obj.mapDetails.scale
               }
             ]
           });
@@ -697,13 +911,13 @@ export default function (stream) {
 
       function aValue() {
         if (obj.publicationType === 'isbn-ismn') {
-          if ((obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic' || obj.formatDetails.format === 'audio') && (obj.type === 'book' || obj.type === 'dissertation')) {
+          if (isPrinted(obj) || isElectronic(obj) || isAudio(obj)) {
             return obj.publicationTime.slice(0, 4) + obj.publicationTime.slice(5, 7);
           }
         }
 
         if (obj.publicationType === 'issn') {
-          if ((obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic' || obj.formatDetails.format === 'audio') && obj.type === 'serial') {
+          if (isPrinted(obj) || isElectronic(obj) || isAudio(obj)) {
             return `${obj.firstYear}--`;
           }
         }
@@ -711,48 +925,108 @@ export default function (stream) {
     }
 
     function gen264() {
-      marcRecord.insertField({
+      if (isPrinted(obj)) {
+        if (obj.formatDetails.city && obj.manufacturer) {
+          return marcRecord.insertField({
+            tag: '264',
+            ind1: '#',
+            ind2: '3',
+            subfields: [
+              {
+                code: 'a',
+                value: `${obj.formatDetails.city} :`
+              },
+              {
+                code: 'b',
+                value: `${obj.manufacturer}`
+              }
+            ]
+          });
+        }
+
+        if (!obj.formatDetails.city && obj.manufacturer) {
+          return marcRecord.insertField({
+            tag: '264',
+            ind1: '#',
+            ind2: '3',
+            subfields: [
+              {
+                code: 'b',
+                value: `${obj.manufacturer}`
+              }
+            ]
+          });
+        }
+
+        if (obj.formatDetails.city && !obj.manufacturer) {
+          return marcRecord.insertField({
+            tag: '264',
+            ind1: '#',
+            ind2: '3',
+            subfields: [
+              {
+                code: 'a',
+                value: `${obj.formatDetails.city} :`
+              }
+            ]
+          });
+        }
+
+        return marcRecord.insertField({
+          tag: '264',
+          ind1: '#',
+          ind2: '1',
+          subfields: [
+            {
+              code: 'a',
+              value: `${obj.publisher.postalAddress.city} :`
+            },
+            {
+              code: 'b',
+              value: `${obj.publisher.name},`
+            },
+            {
+              code: 'c',
+              value: valuePublicationTime(obj)
+            }
+          ]
+        });
+      }
+
+      return marcRecord.insertField({
         tag: '264',
-        ind1: '_',
+        ind1: '#',
         ind2: '1',
         subfields: [
           {
             code: 'a',
-            value: `${obj.city} :`
+            value: `${obj.publisher.postalAddress.city} :`
           },
           {
             code: 'b',
-            value: `${obj.publisher},`
+            value: `${obj.publisher.name},`
           },
           {
             code: 'c',
-            value: obj.publicationTime && `${obj.publicationTime.substr(0, 4)}.`
+            value: valuePublicationTime(obj)
           }
         ]
       });
+    }
 
-      if (obj.formatDetails.format === 'printed') {
-        return marcRecord.insertField({
-          tag: '264',
-          ind1: '_',
-          ind2: '3',
-          subfields: [
-            {
-              code: 'a',
-              value: `${obj.formatDetails.city} :`
-            },
-            {
-              code: 'b',
-              value: `${obj.manufacturer}`
-            }
-          ]
-        });
+    function valuePublicationTime(object) {
+      if (object.publicationType === 'issn') {
+        return object.firstYear;
+      }
+
+      if (object.publicationType === 'isbn-ismn') {
+        return `${object.publicationTime.substr(0, 4)}.`;
       }
     }
 
     function gen310() {
       if (obj.publicationType === 'issn') {
-        if ((obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic' || obj.formatDetails.format === 'audio') && obj.type === 'serial') {
+        if (isPrinted(obj) || isElectronic(obj) || isAudio(obj)) {
           return marcRecord.insertField({
             tag: '310',
             subfields: [
@@ -787,26 +1061,28 @@ export default function (stream) {
 
 
       function aValue(val) {
-        if (obj.publicationType === 'isbn-ismn' || obj.publicationType === 'issn') {
-          if ((obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic') && (obj.type === 'dissertation' || obj.type === 'book')) {
-            if (val === 'a') {
-              return 'teksti';
-            }
-
-            if (val === 'b') {
-              return 'txt';
-            }
+        if ((isPrinted(obj) || isElectronic(obj)) && obj.type !== 'music') {
+          if (val === 'a') {
+            return 'teksti';
           }
 
-          if (obj.formatDetails.format === 'audio' && (obj.type === 'book' || obj.type === 'serial')) {
-            if (val === 'a') {
-              return 'puhe';
-            }
-
-            if (val === 'b') {
-              return 'spw';
-            }
+          if (val === 'b') {
+            return 'txt';
           }
+        }
+
+        if (isAudio(obj) && (obj.type !== 'music' && obj.type !== 'dissertation')) {
+          if (val === 'a') {
+            return 'puhe';
+          }
+
+          if (val === 'b') {
+            return 'spw';
+          }
+        }
+
+        if (obj.type === 'music') {
+          return val === 'a' ? 'nuottikirjoitus' : 'ntm';
         }
       }
     }
@@ -833,28 +1109,28 @@ export default function (stream) {
 
       function aValue() {
         if (obj.publicationType === 'isbn-ismn') {
-          if (obj.formatDetails.format === 'printed' && (obj.type === 'dissertation' || obj.type === 'book')) {
+          if (isPrinted(obj)) {
             return 'käytettävissä ilman laitetta';
           }
 
-          if (obj.formatDetails.format === 'electronic' && (obj.type === 'dissertation' || obj.type === 'book')) {
+          if (isElectronic(obj)) {
             return 'tietokonekäyttöinen';
           }
 
-          if (obj.formatDetails.format === 'audio' && obj.type === 'book') {
+          if (isAudio(obj) && (obj.type !== 'dissertation' && obj.type !== 'music')) {
             return 'audio';
           }
         }
         if (obj.publicationType === 'issn') {
-          if (obj.formatDetails.format === 'printed') {
+          if (isPrinted(obj)) {
             return 'käytettävissä ilman laitetta';
           }
 
-          if (obj.formatDetails.format === 'electronic') {
+          if (isElectronic(obj)) {
             return 'tietokonekäyttöinen';
           }
 
-          if (obj.formatDetails.format === 'audio') {
+          if (isAudio(obj)) {
             return 'audio';
           }
         }
@@ -863,29 +1139,29 @@ export default function (stream) {
 
       function bValue() {
         if (obj.publicationType === 'isbn-ismn') {
-          if (obj.formatDetails.format === 'printed' && (obj.type === 'dissertation' || obj.type === 'book')) {
+          if (isPrinted(obj)) {
             return 'n';
           }
 
-          if (obj.formatDetails.format === 'electronic' && (obj.type === 'dissertation' || obj.type === 'book')) {
+          if (isElectronic(obj)) {
             return 'c';
           }
 
-          if (obj.formatDetails.format === 'audio' && obj.type === 'book') {
+          if (isAudio(obj) && obj.type === 'book') {
             return 's';
           }
         }
 
         if (obj.publicationType === 'issn') {
-          if (obj.formatDetails.format === 'printed') {
+          if (isPrinted(obj)) {
             return 'n';
           }
 
-          if (obj.formatDetails.format === 'electronic') {
+          if (isElectronic(obj)) {
             return 'c';
           }
 
-          if (obj.formatDetails.format === 'audio') {
+          if (isAudio(obj)) {
             return 's';
           }
         }
@@ -914,28 +1190,28 @@ export default function (stream) {
 
       function aValue() {
         if (obj.publicationType === 'isbn-ismn') {
-          if (obj.formatDetails.format === 'printed' && (obj.type === 'dissertation' || obj.type === 'book')) {
+          if (isPrinted(obj)) {
             return 'nide';
           }
 
-          if (obj.formatDetails.format === 'electronic' && (obj.type === 'dissertation' || obj.type === 'book')) {
+          if (isElectronic(obj)) {
             return 'verkkoaineisto';
           }
 
-          if (obj.formatDetails.format === 'audio' && obj.type === 'book') {
+          if (isAudio(obj) && obj.type === 'book') {
             const value = marcRecord.get(/^020$/u)[0].subfields.filter(val => val.code === 'q');
             if (value[0].value === undefined) {
               return 'äänilevy';
             }
 
-            if (value[0].value === 'MP3') {
+            if (value[0].value === 'mp3') {
               return 'verkkoaineisto';
             }
           }
         }
 
         if (obj.publicationType === 'issn') {
-          if (obj.formatDetails.format === 'printed') {
+          if (isPrinted(obj)) {
             return 'nide';
           }
 
@@ -943,7 +1219,7 @@ export default function (stream) {
             return 'verkkoaineisto';
           }
 
-          if (obj.formatDetails.format === 'audio') {
+          if (isAudio(obj)) {
             return 'äänilevy';
           }
         }
@@ -951,21 +1227,21 @@ export default function (stream) {
 
       function bValue() {
         if (obj.publicationType === 'isbn-ismn') {
-          if (obj.formatDetails.format === 'printed' && (obj.type === 'dissertation' || obj.type === 'book')) {
+          if (isPrinted(obj)) {
             return 'nc';
           }
 
-          if (obj.formatDetails.format === 'electronic' && (obj.type === 'dissertation' || obj.type === 'book')) {
+          if (isElectronic(obj)) {
             return 'cr';
           }
 
-          if (obj.formatDetails.format === 'audio' && obj.type === 'book') {
+          if (isAudio(obj) && obj.type === 'book') {
             return 'sd';
           }
         }
 
         if (obj.publicationType === 'issn') {
-          if (obj.formatDetails.format === 'printed') {
+          if (isPrinted(obj)) {
             return 'nc';
           }
 
@@ -973,7 +1249,7 @@ export default function (stream) {
             return 'cr';
           }
 
-          if (obj.formatDetails.format === 'audio') {
+          if (isAudio(obj)) {
             return 'sd';
           }
         }
@@ -989,7 +1265,7 @@ export default function (stream) {
           subfields: [
             {
               code: 'a',
-              value: 'To do later' // No number or volume in schema for ISSN there is main series and sub series with title and identifier
+              value: obj.firstNumber
             }
           ]
         });
@@ -1027,7 +1303,7 @@ export default function (stream) {
         return;
       }
 
-      if ((obj.formatDetails.format === 'electronic' || obj.formatDetails.format === 'printed') && obj.type === 'dissertation') {
+      if ((isElectronic(obj) || isPrinted(obj)) && obj.type === 'dissertation') {
         return marcRecord.insertField({
           tag: '502',
           subfields: [
@@ -1037,7 +1313,7 @@ export default function (stream) {
             },
             {
               code: 'c',
-              value: '{name of the university, ends with period}' // No university field in schema provided
+              value: obj.publisher.university.name
             },
             {
               code: '9',
@@ -1082,7 +1358,7 @@ export default function (stream) {
 
     function gen700() {
       if (obj.publicationType === 'isbn-ismn' && obj.authors.some(item => item.role === 'editor' || item.role === 'illustrator' || item.role === 'translator')) {
-        if (obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic' || obj.formatDetails.format === 'audio') {
+        if (isPrinted(obj) || isElectronic(obj) || isAudio(obj)) {
           return marcRecord.insertField({
             tag: '700',
             ind1: '1',
@@ -1115,7 +1391,7 @@ export default function (stream) {
           subfields: [
             {
               code: 'a',
-              value: `${obj.publisher}.`
+              value: `${obj.publisher.name}.`
             }
           ]
         });
@@ -1133,7 +1409,7 @@ export default function (stream) {
       }
 
       function valueSubfields() {
-        if (obj.formatDetails.format === 'printed' || obj.formatDetails.format === 'electronic' || obj.formatDetails.format === 'serial') {
+        if (isPrinted(obj) || isElectronic(obj)) {
           const subfields = [
             {
               code: 't',
@@ -1163,11 +1439,11 @@ export default function (stream) {
       });
 
       function aValue() {
-        if (obj.formatDetails.format === 'printed') {
+        if (isPrinted(obj)) {
           return 'Verkkoaineisto';
         }
 
-        if (obj.formatDetails.format === 'electronic') {
+        if (isElectronic(obj)) {
           return 'Painettu';
         }
       }
@@ -1184,10 +1460,10 @@ export default function (stream) {
           }
         ];
         if (obj.publicationType === 'issn') {
-          return subfields.concat({code: 't', value: '{title from another form'}, {code: 'x', value: '{ISSN from another form}'}); // Another Form not clear
+          return subfields.concat({code: 't', value: '{title from another form'}, {code: 'x', value: '{ISSN from another form}'}); // Identifer & title from printed or electronic format vise versa
         }
 
-        return subfields.concat({code: 'z', value: '{ISBN from another form}'});
+        return subfields.concat({code: 'z', value: '{ISBN from another form}'}); // Identifer from printed or electronic format vise versa
       }
     }
 
@@ -1201,10 +1477,6 @@ export default function (stream) {
             {
               code: 't',
               value: `${obj.previousPublication.title}`
-            },
-            {
-              code: 'c',
-              value: '{Not Specified}' // Not specified
             },
             {
               code: 'x',
@@ -1236,5 +1508,40 @@ export default function (stream) {
         });
       }
     }
+
+    function isAudio(o) {
+      if (o.publicationType === 'isbn-ismn' && o.formatDetails.format === 'electronic') {
+        if (o.formatDetails.fileFormat.format.includes('mp3') || o.formatDetails.fileFormat.format.includes('cd')) {
+          return true;
+        }
+        return false;
+      }
+      if (o.publicationType === 'issn' && (o.formatDetails.format === 'mp3' || o.formatDetails.format === 'cd')) {
+        // ISSN doesn't have mp3 file format
+        return true;
+      }
+      return false;
+    }
+
+    function isElectronic(o) {
+      if (o.publicationType === 'issn' && (o.formatDetails === 'online' || o.formatDetails === 'cd')) {
+        return true;
+      }
+      if (o.publicationType === 'isbn-ismn' && Object.keys(o.formatDetails)[0] === 'fileFormat') {
+        return true;
+      }
+      return false;
+    }
+
+    function isPrinted(o) {
+      if (o.publicationType === 'issn' && o.formatDetails === 'printed') {
+        return true;
+      }
+      if (o.publicationType === 'isbn-ismn' && Object.keys(o.formatDetails)[0] === 'fileFormat') {
+        return true;
+      }
+      return false;
+    }
+
   }
 }
