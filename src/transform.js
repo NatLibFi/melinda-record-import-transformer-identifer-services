@@ -86,11 +86,11 @@ export default function (stream) {
     }
   }
 
-  async function convertRecord(obj) {
+  function convertRecord(obj) {
     const marcRecord = new MarcRecord();
 
     if (obj.metadataReference && obj.metadataReference.state === 'processed' && obj.metadataReference.update === true) { // eslint-disable-line
-      const record = await getRecord(obj.metadataReference.id);
+      const record = getRecord(obj.metadataReference.id);
       marcRecord.insertField(record.get(/^001$/u));
       marcRecord.insertField(record.get(/^003$/u));
       marcRecord.insertField(record.get(/^035$/u));
