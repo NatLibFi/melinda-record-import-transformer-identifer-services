@@ -123,6 +123,7 @@ export default function (stream) {
     gen362();
     gen490();
     gen502();
+    gen511();
     gen594();
     gen700();
     gen710();
@@ -758,9 +759,9 @@ export default function (stream) {
     }
 
     function gen100() {
-      if (obj.publicationType === 'isbn-ismn' && (obj.authors.some(item => item.role === 'author') || obj.type === 'dissertation')) {
+      if (obj.publicationType === 'isbn-ismn' && (obj.authors.some(item => item.role === 'tekijä') || obj.type === 'dissertation')) {
         if (isPrinted(obj) || isElectronic(obj) || isAudio(obj)) {
-          const author = obj.authors.filter(item => item.role === 'author');
+          const author = obj.authors.filter(item => item.role === 'tekijä');
           return marcRecord.insertField({
             tag: '100',
             ind1: '1',
@@ -1322,6 +1323,29 @@ export default function (stream) {
       }
     }
 
+    function gen511() {
+      if (obj.publicationType === 'issn') {
+        return;
+      }
+
+      if (obj.publicationType === 'isbn-ismn' && obj.authors.some(item => item.role === 'lukija')) {
+        return marcRecord.insertField({
+          tag: '511',
+          ind1: 0,
+          subfields: [
+            {
+              code: 'a',
+              value: 'Lukija'
+            },
+            {
+              code: 'g',
+              value: 'KEEP.'
+            }
+          ]
+        });
+      }
+    }
+
     function gen594() {
       marcRecord.insertField({
         tag: '594',
@@ -1355,7 +1379,7 @@ export default function (stream) {
     }
 
     function gen700() {
-      if (obj.publicationType === 'isbn-ismn' && obj.authors.some(item => item.role === 'editor' || item.role === 'illustrator' || item.role === 'translator')) {
+      if (obj.publicationType === 'isbn-ismn' && obj.authors.some(item => item.role === 'toimittaja' || item.role === 'kääntäjä' || item.role === 'kuvittaja' || item.role === 'lukija')) {
         if (isPrinted(obj) || isElectronic(obj) || isAudio(obj)) {
           return marcRecord.insertField({
             tag: '700',
