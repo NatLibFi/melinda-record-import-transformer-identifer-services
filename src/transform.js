@@ -68,6 +68,7 @@ export default function (stream) {
             const result = convertRecord(value);
             Emitter.emit('record', result);
           } catch (err) {
+            logger.log('ERROR-ON-DATA', err);
             Emitter.emit('error', err);
           }
         }
@@ -78,10 +79,12 @@ export default function (stream) {
           await Promise.all(promises);
           Emitter.emit('end', promises.length);
         } catch (err) {
+          logger.log('ERROR-ON-END', err);
           Emitter.emit('error', err);
         }
       });
     } catch (err) {
+      logger.log('ERROR-COMMON', err);
       Emitter.emit('error', err);
     }
   }
