@@ -1,0 +1,14 @@
+{
+    "description": "",
+    "emptyRecord": true,
+    "defaultParameters": {
+        "recordSchema": "foo"
+    },
+    "requests": [
+        {
+            "method": "get",
+            "url": "/?operation=searchRetrieve&query=rec.id%3D001234567&startRecord=1&recordSchema=foo&version=2.0&maximumRecords=1000",
+            "status": 200
+        }
+    ]
+}

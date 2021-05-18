@@ -1,0 +1,79 @@
+{
+    "language": "fin",
+    "isPublic": true,
+    "type": "book",
+    "title": "Martikkalan nuorisoseura 1901 - 2021 ",
+    "subtitle": "120-vuotishistoria",
+    "publicationTime": "2021-04-30T21:00:00.000Z",
+    "isbnClassification": [
+        "2"
+    ],
+    "authors": [
+        {
+            "givenName": "Leo",
+            "familyName": "Puurunen",
+            "role": [
+                "tekija"
+            ]
+        },
+        {
+            "givenName": "Kaisa",
+            "familyName": "Puurunen",
+            "role": [
+                "toimittaja"
+            ]
+        }
+    ],
+    "seriesDetails": {
+        "identifier": "2737-0674 ",
+        "volume": "1",
+        "title": "Martikkalan julkaisuja"
+    },
+    "formatDetails": {
+        "fileFormat": {
+            "format": [
+                "pdf"
+            ]
+        }
+    },
+    "publisher": "60a3839245c4cf7a78d4b428",
+    "created": {
+        "user": "Test",
+        "timestamp": "1621328786218"
+    },
+    "publicationType": "isbn-ismn",
+    "request": "60a3836a45c4cff3e6d4b427",
+    "metadataReference": [
+        {
+            "format": "pdf",
+            "state": "pending",
+            "update": false
+        },
+        {
+            "format": "paperback",
+            "state": "pending",
+            "update": false
+        }
+    ],
+    "lastUpdated": {
+        "timestamp": "1621328811603",
+        "user": "admin"
+    },
+    "associatedRange": [
+        {
+            "id": "605c606c4ebf85275aafc2db",
+            "subRange": "978-952-90"
+        }
+    ],
+    "identifier": [
+        {
+            "id": "978-952-90-0087-6",
+            "type": "paperback"
+        },
+        {
+            "id": "978-952-90-0086-9",
+            "type": "pdf"
+        }
+    ],
+    "id": "60a3839245c4cf06a8d4b429"
+}

@@ -1,0 +1,101 @@
+{
+  "_validationOptions": {
+    "subfieldValues": false
+  },
+  "fields": [
+    {
+      "tag": "001",
+      "value": "000059297"
+    },
+    {
+      "tag": "003",
+      "value": "FI-MELINDA"
+    },
+    {
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "z",
+          "value": "(FI-MELINDA)006787101"
+        }
+      ],
+      "tag": "035"
+    },
+    {
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "z",
+          "value": "(FI-MELINDA)006787101"
+        }
+      ],
+      "tag": "035"
+    },
+    {
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "(FI-MELINDA)000059297"
+        }
+      ],
+      "tag": "035"
+    },
+    {
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "kvp4046"
+        },
+        {
+          "code": "b"
+        },
+        {
+          "code": "c",
+          "value": "20200228"
+        },
+        {
+          "code": "l",
+          "value": "FIN01"
+        },
+        {
+          "code": "h",
+          "value": "1421"
+        }
+      ],
+      "tag": "CAT"
+    },
+    {
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "kvp4046"
+        },
+        {
+          "code": "b"
+        },
+        {
+          "code": "c",
+          "value": "20200317"
+        },
+        {
+          "code": "l",
+          "value": "FIN01"
+        },
+        {
+          "code": "h",
+          "value": "1304"
+        }
+      ],
+      "tag": "CAT"
+    }
+  ],
+  "leader": ""
+}

@@ -25,3 +25,29 @@
 * for the JavaScript code in this file.
 *
 */
+
+import {expect} from 'chai';
+import generateTests from '@natlibfi/fixugen-http-client';
+import createSruClient from '@natlibfi/sru-client';
+import {convertRecord} from './transform';
+import {READERS} from '@natlibfi/fixura';
+
+describe('transform', () => {
+  generateTests({
+    callback,
+    path: [__dirname, '..', 'test-fixtures', 'transform'],
+    fixura: {
+      reader: READERS.JSON
+    }
+  });
+
+  async function callback({getFixture, defaultParameters}) {
+    const client = createSruClient({...defaultParameters, url: 'http://foo.bar'});
+    const incomingRecord = getFixture('incomingRecord.json');
+    const expectedOutput = getFixture('expectedOutput.json');
+    const result = await convertRecord(incomingRecord, client);
+
+    // Expect records to be marc records
+    expect(result).to.eql(expectedOutput);
+  }
+});
