@@ -59,15 +59,18 @@ export function gen245(marcRecord, obj) {
           }
         ]
       });
-      return marcRecord.insertField({
-        tag: '245',
-        subfields: [
-          {
-            code: 'b',
-            value: `${obj.subtitle}.`
-          }
-        ]
-      });
+      if (obj.subtitle) {
+        return marcRecord.insertField({
+          tag: '245',
+          subfields: [
+            {
+              code: 'b',
+              value: `${obj.subtitle}.`
+            }
+          ]
+        });
+      }
+      return marcRecord;
     }
   }
 
@@ -132,7 +135,7 @@ export function gen263(marcRecord, obj) {
 
     if (obj.publicationType === 'issn') {
       if (isPrinted(obj) || isElectronic(obj) || isAudio(obj)) {
-        return `${obj.firstYear}--`;
+        return `${obj.firstYear.toString()}--`;
       }
     }
   }
@@ -201,7 +204,7 @@ export function gen264(marcRecord, obj) {
         },
         {
           code: 'c',
-          value: valuePublicationTime(obj)
+          value: `${valuePublicationTime(obj)}`
         }
       ]
     });
@@ -222,7 +225,7 @@ export function gen264(marcRecord, obj) {
       },
       {
         code: 'c',
-        value: valuePublicationTime(obj)
+        value: `${valuePublicationTime(obj)}`
       }
     ]
   });

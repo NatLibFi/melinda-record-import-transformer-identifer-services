@@ -13,7 +13,8 @@ export function isAudio(o) {
 }
 
 export function isElectronic(o) {
-  if (o.publicationType === 'issn' && (o.formatDetails === 'online' || o.formatDetails === 'cd')) {
+  const electronicFormats = ['online', 'cd', 'pdf', 'epub', 'mp3'];
+  if (o.publicationType === 'issn' && electronicFormats.includes(o.formatDetails.format)) {
     return true;
   }
   if (o.publicationType === 'isbn-ismn' && Object.keys(o.formatDetails)[0] === 'fileFormat') {
@@ -23,10 +24,11 @@ export function isElectronic(o) {
 }
 
 export function isPrinted(o) {
-  if (o.publicationType === 'issn' && o.formatDetails === 'printed') {
+  const printFormats = ['paperback', 'hardback', 'spiral-binding', 'printed'];
+  if (o.publicationType === 'issn' && printFormats.includes(o.formatDetails.format)) {
     return true;
   }
-  if (o.publicationType === 'isbn-ismn' && Object.keys(o.formatDetails)[0] === 'fileFormat') {
+  if (o.publicationType === 'isbn-ismn' && (o.formatDetails.format === 'printed' || Object.keys(o.formatDetails)[0] === 'fileFormat')) {
     return true;
   }
   return false;
@@ -34,7 +36,7 @@ export function isPrinted(o) {
 
 export function valuePublicationTime(object) {
   if (object.publicationType === 'issn') {
-    return object.firstYear;
+    return object.firstYear.toString();
   }
 
   if (object.publicationType === 'isbn-ismn') {

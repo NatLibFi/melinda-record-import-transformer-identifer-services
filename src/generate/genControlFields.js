@@ -1,3 +1,4 @@
+/* eslint-disable max-statements */
 import {isAudio, isElectronic, isPrinted} from './util';
 
 export function gen007(marcRecord, obj) {
@@ -51,6 +52,16 @@ export function gen007(marcRecord, obj) {
       }
 
       if (isElectronic(obj)) {
+        if (isAudio(obj)) {
+          const initialChars = [
+            {index: 0, value: 's'},
+            {index: 1, value: 'd'}
+          ];
+          const finalChars = new Array(21).fill(' ')
+            .map((_, index) => ({index: index + initialChars.length, value: ' '}));
+          return initialChars.concat(finalChars);
+        }
+
         const initialChars = [
           {index: 0, value: 'c'},
           {index: 1, value: 'r'}
@@ -61,16 +72,6 @@ export function gen007(marcRecord, obj) {
         return initialChars.concat(finalChars);
       }
 
-      if (isAudio(obj)) {
-        const initialChars = [
-          {index: 0, value: 's'},
-          {index: 1, value: 'd'}
-        ];
-
-        const finalChars = new Array(21).fill(' ')
-          .map((_, index) => ({index: index + initialChars.length, value: ' '}));
-        return initialChars.concat(finalChars);
-      }
     }
   }
 }

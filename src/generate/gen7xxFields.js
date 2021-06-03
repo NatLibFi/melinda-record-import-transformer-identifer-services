@@ -74,12 +74,13 @@ export function gen760(marcRecord, obj) {
 }
 
 export function gen776(marcRecord, obj) {
-  marcRecord.insertField({
-    tag: '776',
-    ind1: '0',
-    ind2: '8',
-    subfields: valueSubfields()
-
+  obj.identifier.forEach(i => {
+    marcRecord.insertField({
+      tag: '776',
+      ind1: '0',
+      ind2: '8',
+      subfields: valueSubfields(i)
+    });
   });
 
   function aValue() {
@@ -90,9 +91,11 @@ export function gen776(marcRecord, obj) {
     if (isElectronic(obj)) {
       return 'Painettu';
     }
+
+    return 'Muut';
   }
 
-  function valueSubfields() {
+  function valueSubfields(i) {
     const subfields = [
       {
         code: 'i',
@@ -104,10 +107,10 @@ export function gen776(marcRecord, obj) {
       }
     ];
     if (obj.publicationType === 'issn') {
-      return subfields.concat({code: 't', value: '{title from another form'}, {code: 'x', value: '{ISSN from another form}'}); // Identifer & title from printed or electronic format vise versa
+      return subfields.concat({code: 't', value: i.type}, {code: 'x', value: i.id});
     }
 
-    return subfields.concat({code: 'z', value: '{ISBN from another form}'}); // Identifer from printed or electronic format vise versa
+    return subfields.concat({code: 'z', value: i.id});
   }
 }
 

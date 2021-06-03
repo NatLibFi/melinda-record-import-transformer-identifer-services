@@ -1,3 +1,4 @@
+/* eslint-disable max-statements */
 import {isAudio, isElectronic, isPrinted} from './util';
 
 export function gen310(marcRecord, obj) {
@@ -103,12 +104,12 @@ export function gen337(marcRecord, obj) {
       }
 
       if (isElectronic(obj)) {
+        if (isAudio(obj)) {
+          return 'audio';
+        }
         return 'tietokonekäyttöinen';
       }
 
-      if (isAudio(obj)) {
-        return 'audio';
-      }
     }
   }
 
@@ -120,12 +121,12 @@ export function gen337(marcRecord, obj) {
       }
 
       if (isElectronic(obj)) {
+        if (isAudio(obj) && obj.type === 'book') {
+          return 's';
+        }
         return 'c';
       }
 
-      if (isAudio(obj) && obj.type === 'book') {
-        return 's';
-      }
     }
 
     if (obj.publicationType === 'issn') {
@@ -134,12 +135,12 @@ export function gen337(marcRecord, obj) {
       }
 
       if (isElectronic(obj)) {
+        if (isAudio(obj)) {
+          return 's';
+        }
         return 'c';
       }
 
-      if (isAudio(obj)) {
-        return 's';
-      }
     }
   }
 }
@@ -170,19 +171,19 @@ export function gen338(marcRecord, obj) {
       }
 
       if (isElectronic(obj)) {
+        if (isAudio(obj) && obj.type === 'book') {
+          const value = marcRecord.get(/^020$/u)[0].subfields.filter(val => val.code === 'q');
+          if (value[0].value === undefined) {
+            return 'äänilevy';
+          }
+
+          if (value[0].value === 'mp3') {
+            return 'verkkoaineisto';
+          }
+        }
         return 'verkkoaineisto';
       }
 
-      if (isAudio(obj) && obj.type === 'book') {
-        const value = marcRecord.get(/^020$/u)[0].subfields.filter(val => val.code === 'q');
-        if (value[0].value === undefined) {
-          return 'äänilevy';
-        }
-
-        if (value[0].value === 'mp3') {
-          return 'verkkoaineisto';
-        }
-      }
     }
 
     if (obj.publicationType === 'issn') {
@@ -207,12 +208,12 @@ export function gen338(marcRecord, obj) {
       }
 
       if (isElectronic(obj)) {
+        if (isAudio(obj) && obj.type === 'book') {
+          return 'sd';
+        }
         return 'cr';
       }
 
-      if (isAudio(obj) && obj.type === 'book') {
-        return 'sd';
-      }
     }
 
     if (obj.publicationType === 'issn') {

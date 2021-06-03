@@ -2,8 +2,8 @@ import {isAudio, isElectronic, isPrinted} from './util';
 
 export function gen020(marcRecord, obj) {
   if (obj.publicationType === 'isbn-ismn' && obj.type !== 'music') {
-    if (obj.seriesDetails) {
-      return marcRecord.insertField({
+    if (obj.seriesDetails) { // eslint-disable-line
+      marcRecord.insertField({
         tag: '020',
         subfields: [
           {
@@ -17,19 +17,20 @@ export function gen020(marcRecord, obj) {
         ]
       });
     }
-    marcRecord.insertField({
-      tag: '020',
-      subfields: [
-        {
-          code: 'a',
-          value: 'to do later' // ISBN number
-        },
-        {
-          code: 'q',
-          value: 'to do later' // Printformat
-        }
-
-      ]
+    obj.identifier.forEach(i => {
+      marcRecord.insertField({
+        tag: '020',
+        subfields: [
+          {
+            code: 'a',
+            value: i.id
+          },
+          {
+            code: 'q',
+            value: i.type
+          }
+        ]
+      });
     });
   }
 }
@@ -44,7 +45,7 @@ export function gen022(marcRecord, obj) {
         subfields: [
           {
             code: 'a',
-            value: `${obj.identifier}`
+            value: `${obj.identifier.filter(i => i.type === obj.formatDetails.format)[0].id}`
           },
           {
             code: '2',
@@ -65,11 +66,11 @@ export function gen024(marcRecord, obj) {
       subfields: [
         {
           code: 'a',
-          value: obj.identifier // Need to fix(obj.identifier according to data)
+          value: `${obj.identifier.filter(i => i.type === obj.formatDetails.format)[0].id}`
         },
         {
           code: 'q',
-          value: obj.formatDetails.printFormat
+          value: obj.formatDetails.format
         }
       ]
     });
