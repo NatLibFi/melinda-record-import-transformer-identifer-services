@@ -1,1 +1,45 @@
-{"language":"swe","isPublic":true,"type":"book","title":"Hem & antik","subtitle":"inredning & inspiration i klassisk stil","publicationTime":"2021-12-31T22:00:00.000Z","isbnClassification":["2"],"authors":[{"givenName":"Cecilia ","familyName":"Lindblom","role":["tekija"]}],"seriesDetails":{"identifier":"ISSN 1234-5678","volume":"nr 3 2021","title":"Hem & antik"},"formatDetails":{"printFormat":{"format":["paperback"]},"manufacturer":"Quad Graphic S.p.z.o.o.","city":"Polen","run":5000,"format":"printed"},"additionalDetails":"Julkaisu ei ole lehti vaan kertajulkaisu.","publisher":"60a228d52c4d29fbe11f1815","created":{"user":"Test","timestamp":"1621240021361"},"publicationType":"isbn-ismn","request":"60a227ad2c4d29547e1f1814","metadataReference":[{"format":"paperback","state":"pending","update":false}],"lastUpdated":{"timestamp":"1621240144903","user":"admin"},"associatedRange":[{"id":"60869584e8235c5dba77f6ff","subRange":"978-952-67040"}],"identifier":[{"id":"978-952-67040-0-5","type":"paperback"}],"id":"60a228d52c4d29a3651f1816"}
+{
+  "language": "eng",
+  "email": "codefever17@gmail.com",
+  "contactPerson": "Mario Henningson",
+  "title": "Stone Breaking",
+  "city": "Vantaa",
+  "firstYear": 2020,
+  "firstNumber": "11",
+  "frequency": "yearly",
+  "type": "journal",
+  "publisher": {
+    "name": "deecc",
+    "contactPerson": "Mario Henningson",
+    "postalAddress": {"public": false, "address": "mikonkatu", "zip": "01000", "city": "helsinki"},
+    "phone": "+358445890178",
+    "language": "eng",
+    "publisherType": "A",
+    "selfPublisher": false,
+    "publicationPublisher": true,
+    "request": "60b4ef68ca2eca741bbf24fa",
+    "activity": {"active": true, "yearInactivated": 0},
+    "metadataDelivery": "manual",
+    "created": {"timestamp": 1622470570333},
+    "lastUpdated": {"timestamp": 1622470570333, "user": "tasks"},
+    "emails": [[null]],
+    "id": "60b4efaaca2eca741bbf24fb",
+    "email": "codefever17@gmail.com"
+  },
+  "formatDetails": {"format": "printed", "subFormat": "printed"},
+  "publicationType": "issn",
+  "created": {"user": "Test", "timestamp": 1622702713244},
+  "createdResource": "60b4efaaca2eca741bbf24fc",
+  "request": "60b4ef68ca2eca741bbf24fa",
+  "metadataReference": [
+    {"format": "printed", "state": "pending", "update": false},
+    {"format": "raw", "state": "pending", "update": false}
+  ],
+  "lastUpdated": {"timestamp": 1622702916598, "user": "admin"},
+  "id": "60b87a79121866544e994abe",
+  "associatedRange": [{"id": "60b4efc7ca2eca741bbf24fd", "block": "2701"}],
+  "identifier": [
+    {"id": "2701-004X", "type": "printed"},
+    {"id": "2701-0058", "type": "raw"}
+  ]
+}

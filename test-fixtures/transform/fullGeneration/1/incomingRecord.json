@@ -1,79 +1,37 @@
 {
-    "language": "fin",
+    "language": "eng",
     "isPublic": true,
     "type": "book",
-    "title": "Martikkalan nuorisoseura 1901 - 2021 ",
-    "subtitle": "120-vuotishistoria",
-    "publicationTime": "2021-04-30T21:00:00.000Z",
-    "isbnClassification": [
-        "2"
-    ],
-    "authors": [
-        {
-            "givenName": "Leo",
-            "familyName": "Puurunen",
-            "role": [
-                "tekija"
-            ]
-        },
-        {
-            "givenName": "Kaisa",
-            "familyName": "Puurunen",
-            "role": [
-                "toimittaja"
-            ]
-        }
-    ],
-    "seriesDetails": {
-        "identifier": "2737-0674 ",
-        "volume": "1",
-        "title": "Martikkalan julkaisuja"
+    "title": "df  fdsfews djuk 5",
+    "publicationTime": "2021-05-31T21:00:00.000Z",
+    "isbnClassification": ["1"],
+    "authors": [{"givenName": "sdsdsd", "familyName": "family", "role": ["tekijä"]}],
+    "formatDetails": {"otherPrintFormat": {"one": "Raw"}, "format": "printed"},
+    "publisher": {
+      "name": "Liisa Alanko",
+      "contactPerson": "sfew ew w",
+      "postalAddress": {"address": "Apollonkatu 1 C 24", "zip": "00100", "city": "Helsinki 10"},
+      "phone": "405417101",
+      "language": "eng",
+      "publicationDetails": {"frequency": {"currentYear": 1, "nextYear": 1}, "previouslyPublished": true, "publishingActivities": "occasional"},
+      "publisherType": "A",
+      "selfPublisher": false,
+      "publicationPublisher": true,
+      "request": "60b5f5556308991a3f00f03a",
+      "activity": {"active": true, "yearInactivated": 0},
+      "metadataDelivery": "manual",
+      "created": {"timestamp": 1622537638629},
+      "lastUpdated": {"timestamp": 1622541447992, "user": "admin"},
+      "classification": [],
+      "emails": "abc@abc.co",
+      "id": "60b5f5a66308991a3f00f03b"
     },
-    "formatDetails": {
-        "fileFormat": {
-            "format": [
-                "pdf"
-            ]
-        }
-    },
-    "publisher": "60a3839245c4cf7a78d4b428",
-    "created": {
-        "user": "Test",
-        "timestamp": "1621328786218"
-    },
+    "created": {"user": "Test", "timestamp": 1622548490753},
     "publicationType": "isbn-ismn",
-    "request": "60a3836a45c4cff3e6d4b427",
-    "metadataReference": [
-        {
-            "format": "pdf",
-            "state": "pending",
-            "update": false
-        },
-        {
-            "format": "paperback",
-            "state": "pending",
-            "update": false
-        }
-    ],
-    "lastUpdated": {
-        "timestamp": "1621328811603",
-        "user": "admin"
-    },
-    "associatedRange": [
-        {
-            "id": "605c606c4ebf85275aafc2db",
-            "subRange": "978-952-90"
-        }
-    ],
-    "identifier": [
-        {
-            "id": "978-952-90-0087-6",
-            "type": "paperback"
-        },
-        {
-            "id": "978-952-90-0086-9",
-            "type": "pdf"
-        }
-    ],
-    "id": "60a3839245c4cf06a8d4b429"
-}
+    "request": "60b5f5556308991a3f00f03a",
+    "metadataReference": [{"format": "Raw", "state": "pending", "update": false}],
+    "lastUpdated": {"timestamp": 1622603456035, "user": "tasks"},
+    "associatedRange": [{"id": "60b61e67121866544e994aab", "subRange": "978-953-7100"}],
+    "identifier": [{"id": "978-953-7100-01-0", "type": "Raw"}],
+    "id": "60b6200a121866544e994aae"
+  }

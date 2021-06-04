@@ -1,1 +1,218 @@
-{}
+{
+  "failed": false,
+  "record": {
+    "_validationOptions": {
+      "subfieldValues": false
+    },
+    "fields": [
+      {
+        "tag": "008",
+        "value": "      s2021     fi           |0| |eng| "
+      },
+      {
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "978-953-7100-01-0"
+          },
+          {
+            "code": "q",
+            "value": "Raw"
+          }
+        ],
+        "tag": "020"
+      },
+      {
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "FI-NL"
+          },
+          {
+            "code": "b",
+            "value": "fin"
+          },
+          {
+            "code": "e",
+            "value": "rda"
+          }
+        ],
+        "tag": "040"
+      },
+      {
+        "ind1": "0",
+        "ind2": "_",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "eng"
+          }
+        ],
+        "tag": "041"
+      },
+      {
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "finb"
+          }
+        ],
+        "tag": "042"
+      },
+      {
+        "ind1": "0",
+        "ind2": "0",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "df  fdsfews djuk 5."
+          }
+        ],
+        "tag": "245"
+      },
+      {
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "202105"
+          }
+        ],
+        "tag": "263"
+      },
+      {
+        "ind1": "#",
+        "ind2": "1",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Helsinki 10 :"
+          },
+          {
+            "code": "b",
+            "value": "Liisa Alanko,"
+          },
+          {
+            "code": "c",
+            "value": "2021."
+          }
+        ],
+        "tag": "264"
+      },
+      {
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "teksti"
+          },
+          {
+            "code": "b",
+            "value": "txt"
+          },
+          {
+            "code": "2",
+            "value": "rdacontent"
+          }
+        ],
+        "tag": "336"
+      },
+      {
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "käytettävissä ilman laitetta"
+          },
+          {
+            "code": "b",
+            "value": "n"
+          },
+          {
+            "code": "2",
+            "value": "rdamedia"
+          }
+        ],
+        "tag": "337"
+      },
+      {
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "nide"
+          },
+          {
+            "code": "b",
+            "value": "nc"
+          },
+          {
+            "code": "2",
+            "value": "rdacarrier"
+          }
+        ],
+        "tag": "338"
+      },
+      {
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "ENNAKKOTIETO KANSALLISKIRJASTO"
+          },
+          {
+            "code": "5",
+            "value": "FENNI"
+          }
+        ],
+        "tag": "594"
+      },
+      {
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "EI VASTAANOTETTU"
+          },
+          {
+            "code": "5",
+            "value": "FENNI"
+          }
+        ],
+        "tag": "594"
+      },
+      {
+        "ind1": "0",
+        "ind2": "8",
+        "subfields": [
+          {
+            "code": "i",
+            "value": "Verkkoaineisto"
+          },
+          {
+            "code": "9",
+            "value": "FENNI<KEEP>"
+          },
+          {
+            "code": "z",
+            "value": "978-953-7100-01-0"
+          }
+        ],
+        "tag": "776"
+      }
+    ],
+    "leader": "     nam a22     8i     "
+  }
+}
