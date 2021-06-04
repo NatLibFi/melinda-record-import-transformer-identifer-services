@@ -30,5 +30,5 @@ import {Utils} from '@natlibfi/identifier-services-commons';
 
 const {readEnvironmentVariable} = Utils;
 
-export const SRU_URL = readEnvironmentVariable('SRU_URL');
+export const SRU_URL = readEnvironmentVariable('SRU_URL', {defaultValue: 'http://foo.bar'});
 
